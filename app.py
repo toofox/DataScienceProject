@@ -11,7 +11,11 @@ server = app.server
 
 # IMPORT DATA
 
-test_df = pd.read_csv('Data/Uni_Kiel_arxiv_by_name.csv')
+# test_df = pd.read_csv('Data/Uni_Kiel_arxiv_by_name.csv')
+df = pd.DataFrame({
+    'Category': ['A', 'B', 'C', 'D'],
+    'Values': [10, 15, 7, 20]
+})
 
 # ADDITIONAL LAYOUT
 
@@ -46,10 +50,10 @@ page1_layout = html.Div([
 page2_layout = html.Div([
     html.H2("Research Question 2: Example Analysis"),
     html.P("This section provides an interactive visualization answering the second research question."),
-    dcc.Graph(
-        id="rq2-graph",
-        figure=px.pie(test_df, names="Category", values="Values", title="Category Distribution")
-    ),
+    #dcc.Graph(
+    #    id="rq2-graph",
+    #    figure=px.pie(test_df, names="Category", values="Values", title="Category Distribution")
+    #),
     html.P("Description: This chart visualizes the data associated with Research Question 2."),
 ])
 
