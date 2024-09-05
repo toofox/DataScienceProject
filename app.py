@@ -42,7 +42,7 @@ page1_layout = html.Div([
     html.P("This section provides an interactive visualization answering the first research question."),
     dcc.Graph(
         id="rq1-graph",
-        figure=px.bar(test_df, x="Category", y="Values", title="Category Values")
+        figure=px.bar(df, x="Category", y="Values", title="Category Values")
     ),
     html.P("Description: This chart visualizes the data associated with Research Question 1."),
 ])
@@ -50,10 +50,10 @@ page1_layout = html.Div([
 page2_layout = html.Div([
     html.H2("Research Question 2: Example Analysis"),
     html.P("This section provides an interactive visualization answering the second research question."),
-    #dcc.Graph(
-    #    id="rq2-graph",
-    #    figure=px.pie(test_df, names="Category", values="Values", title="Category Distribution")
-    #),
+    dcc.Graph(
+        id="rq2-graph",
+        figure=px.pie(df, names="Category", values="Values", title="Category Distribution")
+    ),
     html.P("Description: This chart visualizes the data associated with Research Question 2."),
 ])
 
