@@ -12,11 +12,9 @@ app.layout = html.Div([
     # Navbar for smooth navigation between sections
     dbc.NavbarSimple(
         children=[
-            dbc.NavItem(dbc.NavLink("Home", href="#start")),
-            dbc.NavItem(dbc.NavLink("Projects", href="#projects")),
-            dbc.NavItem(dbc.NavLink("About", href="#about")),
+            #dbc.NavItem(dbc.NavLink("Home", href="#start")),
         ],
-        brand="Data Science Portfolio",
+        brand="Joule im Pool",
         brand_href="#start",
         color="dark",
         dark=True,
