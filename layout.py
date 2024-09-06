@@ -20,7 +20,10 @@ df_sentence_length = pd.DataFrame({
     'Avg_Sentence_Length': [12.5, 13.0, 14.0]
 })
 
-df_asia_data = pd.DataFrame.read_csv('Data/EU_Asia_summary.csv')
+df_asia_data = pd.DataFrame({
+    'Year': ['2020', '2021', '2022'],
+    'Keyword_Count': [1200, 1300, 1500]
+})
 
 # Home Section (Intro and overview)
 # Home Section (Intro and overview)
@@ -144,7 +147,7 @@ projects_section = html.Div(id="projects", children=[
         dbc.Row([
             dbc.Col(dcc.Graph(
                 id="global-comparison-graph",
-                figure=px.line(df_asia_data, x="PubDate", y="flag_count", color="Region", title="Comparison of EU vs Asia.")
+                figure=px.line(df_asia_data, x="Year", y="Keyword_Count", title="Global Comparison of Keyword Trends")
             )),
         ], className="mb-5"),
 
