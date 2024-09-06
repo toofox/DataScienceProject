@@ -1,109 +1,125 @@
 import dash_bootstrap_components as dbc
 from dash import html, dcc
+import plotly.express as px
+import pandas as pd
 
-# Abschnitt "Start"
+# Example CSV data
+df_word_usage = pd.DataFrame({
+    'Year': ['2020', '2021', '2022'],
+    'Word_Count': [100, 150, 200],
+    'Word_Type': ['Technical', 'Non-Technical', 'Mixed']
+})
+
+df_sentence_length = pd.DataFrame({
+    'Year': ['2020', '2021', '2022'],
+    'Avg_Sentence_Length': [12.5, 13.0, 14.0]
+})
+
+df_asia_data = pd.DataFrame({
+    'Year': ['2020', '2021', '2022'],
+    'Keyword_Count': [1200, 1300, 1500]
+})
+
+# Home Section (Intro and overview)
 homepage = html.Div(id="start", children=[
     dbc.Container([
         dbc.Row([
-            dbc.Col(html.H2("Willkommen zum Forschungsprojekt", style={"color": "#9b0a7d"}), className="mt-4"),
-            dbc.Col(html.P("Auf dieser Seite werden verschiedene Forschungsfragen zu den Auswirkungen von ChatGPT auf wissenschaftliche Arbeiten dargestellt."))
+            dbc.Col(html.H1("Welcome to our Data Science Project!", style={"color": "#9b0a7d"}), className="mt-5"),
+            dbc.Col(html.P(
+                "Auf dieser Seite werden verschiedene Forschungsfragen zu den Auswirkungen von ChatGPT auf wissenschaftliche Arbeiten dargestellt. "
+                "Below, you'll find a series of research questions exploring the impact of ChatGPT on scientific papers."
+            )),
         ]),
-    ], className="pt-5")
+        dbc.Row([
+            dbc.Col(html.Button("Explore Research", className="btn btn-primary", style={"background-color": "#9b0a7d"}),
+                    href="#projects"),
+        ], className="pt-4 text-center"),
+    ], className="py-5")
 ])
 
-# Abschnitt "Frage 1"
-frage1_layout = html.Div(id="frage1", children=[
+# Projects Section now contains research questions and actual data visualizations
+projects_section = html.Div(id="projects", children=[
     dbc.Container([
         dbc.Row([
-            dbc.Col(html.H2("Frage 1: Veränderung der Wortverwendung", style={"color": "#9b0a7d"}), className="mt-4"),
-            dbc.Col(html.P("Wie hat sich die Verwendung bestimmter Wörter in wissenschaftlichen Arbeiten seit der Einführung von ChatGPT verändert?"))
+            dbc.Col(html.H2("Research Questions", style={"color": "#9b0a7d"}), className="mt-5 mb-4 text-center"),
+        ]),
+
+        # Research Question 1: Changes in Word Usage (using real data)
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 1: Changes in Word Usage in Scientific Papers"), width=6),
+            dbc.Col(html.P(
+                "How has the usage of specific words in scientific papers changed since the introduction of ChatGPT? "
+                "This analysis aims to identify whether certain terms have become more or less frequent, potentially due to the influence of ChatGPT.")),
         ]),
         dbc.Row([
             dbc.Col(dcc.Graph(
-                id="frage1-graph",
-                figure={  # Beispiel-Plot
-                    'data': [{'x': ['2020', '2021', '2022'], 'y': [20, 35, 50], 'type': 'bar', 'name': 'Wörter'}],
-                    'layout': {'title': 'Veränderung der Wortverwendung'}
-                }
+                id="word-usage-graph",
+                figure=px.bar(df_word_usage, x="Year", y="Word_Count", color="Word_Type",
+                              title="Word Usage Over Time by Type")
             )),
-        ]),
-    ], className="pt-5")
-])
+        ], className="mb-5"),
 
-# Abschnitt "Frage 2"
-frage2_layout = html.Div(id="frage2", children=[
-    dbc.Container([
+        # Research Question 2: Changes in the Use of Question Words
         dbc.Row([
-            dbc.Col(html.H2("Frage 2: Veränderung der Fragewörter", style={"color": "#9b0a7d"}), className="mt-4"),
-            dbc.Col(html.P("Welche Veränderungen gibt es in der Nutzung von Fragewörtern in wissenschaftlichen Arbeiten seit der Einführung von ChatGPT?"))
+            dbc.Col(html.H4("Research Question 2: Changes in the Use of Question Words"), width=6),
+            dbc.Col(html.P(
+                "What changes are there in the use of question words (e.g., what, why) in scientific papers since the introduction of ChatGPT? "
+                "This section explores the frequency of question words before and after 2022.")),
         ]),
         dbc.Row([
             dbc.Col(dcc.Graph(
-                id="frage2-graph",
-                figure={  # Beispiel-Plot
-                    'data': [{'labels': ['Was', 'Warum', 'Wie'], 'values': [30, 20, 50], 'type': 'pie'}],
-                    'layout': {'title': 'Verwendung von Fragewörtern'}
-                }
+                id="question-words-graph",
+                figure=px.pie(df_word_usage, names="Word_Type", values="Word_Count",
+                              title="Distribution of Question Words")
             )),
-        ]),
-    ], className="pt-5")
-])
+        ], className="mb-5"),
 
-# Abschnitt "Frage 3"
-frage3_layout = html.Div(id="frage3", children=[
-    dbc.Container([
+        # Research Question 3: Sentence Length in Scientific Papers
         dbc.Row([
-            dbc.Col(html.H2("Frage 3: Veränderung der Satzlängen", style={"color": "#9b0a7d"}), className="mt-4"),
-            dbc.Col(html.P("Wie haben sich die Satzlängen in wissenschaftlichen Arbeiten seit der Einführung von ChatGPT verändert?"))
+            dbc.Col(html.H4("Research Question 3: Sentence Length in Scientific Papers"), width=6),
+            dbc.Col(html.P(
+                "How has the length of sentences in scientific papers changed since the introduction of ChatGPT? "
+                "We aim to investigate whether sentences have become longer or shorter post-ChatGPT.")),
         ]),
         dbc.Row([
             dbc.Col(dcc.Graph(
-                id="frage3-graph",
-                figure={  # Beispiel-Plot
-                    'data': [{'x': ['2020', '2021', '2022'], 'y': [25, 40, 55], 'type': 'line'}],
-                    'layout': {'title': 'Satzlängen im Zeitverlauf'}
-                }
+                id="sentence-length-graph",
+                figure=px.line(df_sentence_length, x="Year", y="Avg_Sentence_Length",
+                               title="Average Sentence Length Over Time")
             )),
+        ], className="mb-5"),
+
+        # Research Question 4: Asia University Keyword Analysis
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 4: Keyword Frequency in Asia Universities"), width=6),
+            dbc.Col(html.P(
+                "This analysis explores how keyword usage has changed in Asian universities since the introduction of ChatGPT.")),
         ]),
-    ], className="pt-5")
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="asia-keyword-graph",
+                figure=px.line(df_asia_data, x="Year", y="Keyword_Count",
+                               title="Keyword Count in Asian Universities Over Time")
+            )),
+        ], className="mb-5"),
+
+    ], className="py-5")
 ])
 
-# Abschnitt "Frage 4"
-frage4_layout = html.Div(id="frage4", children=[
+# About Section
+about_section = html.Div(id="about", children=[
     dbc.Container([
         dbc.Row([
-            dbc.Col(html.H2("Frage 4: Unterschiede zwischen Abstracts und Texten", style={"color": "#9b0a7d"}), className="mt-4"),
-            dbc.Col(html.P("Untersuchung der Unterschiede zwischen Abstracts und vollständigen wissenschaftlichen Texten in Bezug auf die Verwendung von ChatGPT."))
+            dbc.Col(html.H2("About Me", style={"color": "#9b0a7d"}), className="mt-5 mb-4 text-center"),
         ]),
-    ], className="pt-5")
-])
-
-# Abschnitt "Frage 5"
-frage5_layout = html.Div(id="frage5", children=[
-    dbc.Container([
         dbc.Row([
-            dbc.Col(html.H2("Frage 5: Vergleich CAU vs. andere Universitäten", style={"color": "#9b0a7d"}), className="mt-4"),
-            dbc.Col(html.P("Vergleich der Einflüsse von ChatGPT auf wissenschaftliche Arbeiten zwischen der Christian-Albrechts-Universität zu Kiel (CAU) und anderen deutschen Universitäten."))
-        ]),
-    ], className="pt-5")
-])
-
-# Abschnitt "Frage 6"
-frage6_layout = html.Div(id="frage6", children=[
-    dbc.Container([
-        dbc.Row([
-            dbc.Col(html.H2("Frage 6: Vergleich zwischen CAU-Fakultäten", style={"color": "#9b0a7d"}), className="mt-4"),
-            dbc.Col(html.P("Vergleich der Wortwahl und Struktur wissenschaftlicher Arbeiten zwischen verschiedenen Fakultäten der CAU."))
-        ]),
-    ], className="pt-5")
-])
-
-# Abschnitt "Frage 7"
-frage7_layout = html.Div(id="frage7", children=[
-    dbc.Container([
-        dbc.Row([
-            dbc.Col(html.H2("Frage 7: Globale Unterschiede bei Universitäten", style={"color": "#9b0a7d"}), className="mt-4"),
-            dbc.Col(html.P("Unterschiede in der Verwendung von ChatGPT in wissenschaftlichen Arbeiten an globalen Universitäten."))
-        ]),
-    ], className="pt-5")
+            dbc.Col(html.P(
+                "Thank you for exploring our Page"
+                "This Date was presented by Louis Krückmeyer, Matheus Kolzarek and Tom Skrzynski-Fox."
+                "This project was created to explore the impact of ChatGPT on scientific papers. "
+                "We hope you enjoyed the analysis and visualizations presented here. "
+                "Thank you for the great support and feedback Mirjam Bayer"
+            )),
+        ], className="text-center"),
+    ], className="py-5")
 ])

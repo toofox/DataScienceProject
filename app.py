@@ -1,42 +1,32 @@
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html
-from dash.dependencies import Input, Output
-from layout import homepage, frage1_layout, frage2_layout, frage3_layout, frage4_layout, frage5_layout, frage6_layout, frage7_layout
+from layout import homepage, projects_section, about_section
 
-# App-Initialisierung mit Bootstrap
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+# Initialize Dash app with external Bootstrap stylesheet
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX])
 server = app.server
 
-# Hauptlayout der App, das durch Scrollen die Abschnitte verbindet
+# Define the layout of the app, linking the sections with smooth scrolling
 app.layout = html.Div([
-    # Navigationsleiste mit internen Links zu den Abschnitten
+    # Navbar for smooth navigation between sections
     dbc.NavbarSimple(
         children=[
-            dbc.NavItem(dbc.NavLink("Start", href="#start")),
-            dbc.NavItem(dbc.NavLink("Frage 1", href="#frage1")),
-            dbc.NavItem(dbc.NavLink("Frage 2", href="#frage2")),
-            dbc.NavItem(dbc.NavLink("Frage 3", href="#frage3")),
-            dbc.NavItem(dbc.NavLink("Frage 4", href="#frage4")),
-            dbc.NavItem(dbc.NavLink("Frage 5", href="#frage5")),
-            dbc.NavItem(dbc.NavLink("Frage 6", href="#frage6")),
-            dbc.NavItem(dbc.NavLink("Frage 7", href="#frage7")),
+            dbc.NavItem(dbc.NavLink("Home", href="#start")),
+            dbc.NavItem(dbc.NavLink("Projects", href="#projects")),
+            dbc.NavItem(dbc.NavLink("About", href="#about")),
         ],
-        brand="Forschungsprojekt zu ChatGPT",
+        brand="Data Science Portfolio",
+        brand_href="#start",
         color="dark",
         dark=True,
-        className="mb-4"
+        className="mb-4",
     ),
 
-    # Einfügen der Layouts für jeden Abschnitt der Seite
+    # Home, Projects, About sections
     homepage,
-    frage1_layout,
-    frage2_layout,
-    frage3_layout,
-    frage4_layout,
-    frage5_layout,
-    frage6_layout,
-    frage7_layout,
+    projects_section,
+    about_section,
 ])
 
 if __name__ == '__main__':
