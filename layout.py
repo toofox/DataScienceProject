@@ -21,6 +21,7 @@ df_asia_data = pd.DataFrame({
 })
 
 # Home Section (Intro and overview)
+# Home Section (Intro and overview)
 homepage = html.Div(id="start", children=[
     dbc.Container([
         dbc.Row([
@@ -31,12 +32,7 @@ homepage = html.Div(id="start", children=[
                 "Below, you'll find a series of research questions exploring the impact of ChatGPT on scientific papers."
             )),
         ]),
-        dbc.Row([
-            dbc.Col(
-                dbc.Button("Explore Research", color="primary", style={"background-color": "#9b0a7d"},
-                           href="#projects"),
-            ),
-        ], className="pt-4 text-center"),
+        # Removed the row containing the "Explore Research" button
     ], className="py-5")
 ])
 
