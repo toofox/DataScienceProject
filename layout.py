@@ -25,14 +25,17 @@ homepage = html.Div(id="start", children=[
     dbc.Container([
         dbc.Row([
             dbc.Col(html.H1("Welcome to our Data Science Project!", style={"color": "#9b0a7d"}), className="mt-5"),
+        ]),
+        dbc.Row([
             dbc.Col(html.P(
-                "Auf dieser Seite werden verschiedene Forschungsfragen zu den Auswirkungen von ChatGPT auf wissenschaftliche Arbeiten dargestellt. "
                 "Below, you'll find a series of research questions exploring the impact of ChatGPT on scientific papers."
             )),
         ]),
         dbc.Row([
-            dbc.Col(html.Button("Explore Research", className="btn btn-primary", style={"background-color": "#9b0a7d"}),
-                    href="#projects"),
+            dbc.Col(
+                dbc.Button("Explore Research", color="primary", style={"background-color": "#9b0a7d"},
+                           href="#projects"),
+            ),
         ], className="pt-4 text-center"),
     ], className="py-5")
 ])
@@ -102,7 +105,6 @@ projects_section = html.Div(id="projects", children=[
                                title="Keyword Count in Asian Universities Over Time")
             )),
         ], className="mb-5"),
-
     ], className="py-5")
 ])
 
