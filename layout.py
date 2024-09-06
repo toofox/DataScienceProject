@@ -162,10 +162,10 @@ about_section = html.Div(id="about", children=[
         ]),
         dbc.Row([
             dbc.Col(html.P(
-                "Thank you for exploring our Page"
-                "This Date was presented by Louis Krückmeyer, Matheus Kolzarek and Tom Skrzynski-Fox."
-                "This project was created to explore the impact of ChatGPT on scientific papers. "
-                "We hope you enjoyed the analysis and visualizations presented here. "
+                "Thank you for exploring our Page\n"
+                "This Date was presented by Louis Krückmeyer, Matheus Kolzarek and Tom Skrzynski-Fox.\n"
+                "This project was created to explore the impact of ChatGPT on scientific papers. \n"
+                "We hope you enjoyed the analysis and visualizations presented here. \n"
                 "Thank you for the great support and feedback Mirjam Bayer"
             )),
         ], className="text-center"),
