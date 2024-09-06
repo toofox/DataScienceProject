@@ -2,6 +2,11 @@ import dash_bootstrap_components as dbc
 from dash import html, dcc
 import plotly.express as px
 import pandas as pd
+#chatgpt:
+# Um  eigene CSV-Datei einzufügen, ersetzen Sie 'your_file.csv' durch den Pfad zu Ihrer CSV-Datei.
+# Stellen Sie sicher, dass Ihre CSV-Datei im selben Verzeichnis wie dieses Skript liegt oder geben Sie den vollständigen Pfad an.
+# df_bsp = pd.read_csv('your_file.csv')
+# df_bsp.head({Anzahl der Zeilen, die angezeigt werden sollen})
 
 # Example CSV data
 df_word_usage = pd.DataFrame({
@@ -101,6 +106,51 @@ projects_section = html.Div(id="projects", children=[
                                title="Keyword Count in Asian Universities Over Time")
             )),
         ], className="mb-5"),
+
+        # Research Question 5: Comparison Between CAU and Other Universities
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 5: Comparison Between CAU and Other Universities"), width=6),
+            dbc.Col(html.P(
+                "What are the differences between Christian-Albrechts-Universität zu Kiel (CAU) and other German universities regarding the perceived influence of ChatGPT? "
+                "This project compares the language changes at CAU with other institutions.")),
+        ]),
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="comparison-universities-graph",
+                figure=px.bar(df_word_usage, x="Year", y="Word_Count", color="Word_Type",
+                              title="Comparison of Word Usage Across Universities")
+            )),
+        ], className="mb-5"),
+
+        # Research Question 6: Faculty Differences at CAU
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 6: Faculty Differences at CAU"), width=6),
+            dbc.Col(html.P(
+                "How has word usage changed across different faculties at CAU since the introduction of ChatGPT? "
+                "This project analyzes differences between disciplines, such as natural sciences and humanities.")),
+        ]),
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="faculty-differences-graph",
+                figure=px.bar(df_word_usage, x="Year", y="Word_Count", color="Word_Type",
+                              title="Comparison of Word Usage by Faculty")
+            )),
+        ], className="mb-5"),
+
+        # Research Question 7: Global Comparison Between Universities
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 7: Global Comparison Between Universities"), width=6),
+            dbc.Col(html.P(
+                "How do the effects of ChatGPT on scientific papers differ between various universities worldwide? "
+                "This includes comparisons between top German universities, European, and Asian institutions.")),
+        ]),
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="global-comparison-graph",
+                figure=px.line(df_asia_data, x="Year", y="Keyword_Count", title="Global Comparison of Keyword Trends")
+            )),
+        ], className="mb-5"),
+
     ], className="py-5")
 ])
 
