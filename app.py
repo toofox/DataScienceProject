@@ -17,6 +17,8 @@ df = pd.DataFrame({
     'Values': [10, 15, 7, 20]
 })
 
+asia_df = pd.read_csv('Data/Asia_Uni_arxiv_flag.csv')
+
 # ADDITIONAL LAYOUT
 
 # Navigational Bar
@@ -25,6 +27,7 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(dbc.NavLink("Homepage", href="/")),
         dbc.NavItem(dbc.NavLink("Research Question 1", href="/rq1")),
         dbc.NavItem(dbc.NavLink("Research Question 2", href="/rq2")),
+        dbc.NavItem(dbc.NavLink("Asia Data", href="/rq3")),
         dbc.NavItem(dbc.NavLink("Imprint", href="/imprint")),
     ],
     brand="Data Science Project",
@@ -55,6 +58,15 @@ page2_layout = html.Div([
         figure=px.pie(df, names="Category", values="Values", title="Category Distribution")
     ),
     html.P("Description: This chart visualizes the data associated with Research Question 2."),
+])
+
+page3_layout = html.Div([
+    html.H2("Research Question 3: Asia Time/Keyword Analysis"),
+    html.P("This section provides an interactive visualization answering the first research question."),
+    dcc.Graph(
+
+    ),
+    html.P("Description: This chart visualizes the keyword count over the years in Asia."),
 ])
 
 imprint_layout = html.Div([
