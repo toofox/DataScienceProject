@@ -1,3 +1,0 @@
-A
-'S*Öd
-+üsladfömokaäsdöpfmäasdmfäölamsdäfölmas
