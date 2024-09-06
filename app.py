@@ -1,43 +1,31 @@
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html
-from dash.dependencies import Input, Output
-from layout import homepage, page1_layout, page2_layout, page3_layout, imprint_layout
+from layout import homepage, projects_section, about_section
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+# Initialize Dash app with external Bootstrap stylesheet
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX])
 server = app.server
 
-# Main layout
+# Define the layout of the app, linking the sections with smooth scrolling
 app.layout = html.Div([
-    dcc.Location(id="url", refresh=False),
+    # Navbar for smooth navigation between sections
     dbc.NavbarSimple(
         children=[
-            dbc.NavItem(dbc.NavLink("Homepage", href="/")),
-            dbc.NavItem(dbc.NavLink("Research Question 1", href="/rq1")),
-            dbc.NavItem(dbc.NavLink("Research Question 2", href="/rq2")),
-            dbc.NavItem(dbc.NavLink("Asia Data", href="/rq3")),
-            dbc.NavItem(dbc.NavLink("Imprint", href="/imprint")),
+            #dbc.NavItem(dbc.NavLink("Home", href="#start")),
         ],
-        brand="Data Science Project",
-        color="primary",
+        brand="Joule im Pool",
+        brand_href="#start",
+        color="dark",
         dark=True,
+        className="mb-4",
     ),
-    html.Div(id="page-content", className="container-fluid"),
-])
 
-# Callback to manage page routing
-@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
-def display_page(pathname):
-    if pathname == "/rq1":
-        return page1_layout
-    elif pathname == "/rq2":
-        return page2_layout
-    elif pathname == "/rq3":
-        return page3_layout
-    elif pathname == "/imprint":
-        return imprint_layout
-    else:
-        return homepage
+    # Home, Projects, About sections
+    homepage,
+    projects_section,
+    about_section,
+])
 
 if __name__ == '__main__':
     app.run_server(debug=True)

@@ -2,98 +2,172 @@ import dash_bootstrap_components as dbc
 from dash import html, dcc
 import plotly.express as px
 import pandas as pd
+#chatgpt:
+# Um  eigene CSV-Datei einzufügen, ersetzen Sie 'your_file.csv' durch den Pfad zu Ihrer CSV-Datei.
+# Stellen Sie sicher, dass Ihre CSV-Datei im selben Verzeichnis wie dieses Skript liegt oder geben Sie den vollständigen Pfad an.
+# df_bsp = pd.read_csv('your_file.csv')
+# df_bsp.head({Anzahl der Zeilen, die angezeigt werden sollen})
 
-# Beispiel-Daten
-df = pd.DataFrame({
-    'Category': ['A', 'B', 'C', 'D'],
-    'Values': [10, 15, 7, 20]
+# Example CSV data
+df_word_usage = pd.DataFrame({
+    'Year': ['2020', '2021', '2022'],
+    'Word_Count': [100, 150, 200],
+    'Word_Type': ['Technical', 'Non-Technical', 'Mixed']
 })
-asia_df = pd.DataFrame({
-    'Year': [2020, 2021, 2022],
-    'KeywordCount': [100, 150, 200]
+
+df_sentence_length = pd.DataFrame({
+    'Year': ['2020', '2021', '2022'],
+    'Avg_Sentence_Length': [12.5, 13.0, 14.0]
 })
 
-# Homepage Layout
-homepage = dbc.Container([
-    dbc.Row([
-        dbc.Col(html.H2("Willkommen zu unserem Forschungsprojekt", style={"color": "#9b0a7d"})),
-        dbc.Col(html.P("Diese Website präsentiert interaktive Visualisierungen und Einblicke in unsere Forschungsfragen zum Einfluss von ChatGPT auf wissenschaftliche Arbeiten.")),
-    ], className="mt-4"),
-    dbc.Row([
-        dbc.Col(html.P("Navigiere durch die verschiedenen Forschungsfragen, um mehr zu erfahren!"))
-    ])
+df_asia_data = pd.DataFrame({
+    'Year': ['2020', '2021', '2022'],
+    'Keyword_Count': [1200, 1300, 1500]
+})
+
+# Home Section (Intro and overview)
+# Home Section (Intro and overview)
+homepage = html.Div(id="start", children=[
+    dbc.Container([
+        dbc.Row([
+            dbc.Col(html.H1("Welcome to our Data Science Project!", style={"color": "#9b0a7d"}), className="mt-5"),
+        ]),
+        dbc.Row([
+            dbc.Col(html.P(
+                "Below, you'll find a series of research questions exploring the impact of ChatGPT on scientific papers."
+            )),
+        ]),
+        # Removed the row containing the "Explore Research" button
+    ], className="py-5")
 ])
 
-# Layout für Forschungsfrage 1: Veränderung der Wortverwendung
-page1_layout = dbc.Container([
-    dbc.Row(dbc.Col(html.H2("Forschungsfrage 1: Veränderung der Wortverwendung", style={"color": "#9b0a7d"}))),
-    dbc.Row(dbc.Col(html.P("Wie hat sich die Verwendung bestimmter Wörter in wissenschaftlichen Arbeiten seit der Einführung von ChatGPT verändert?"))),
-    dbc.Row([
-        dbc.Col(dcc.Graph(
-            id="rq1-graph",
-            figure=px.bar(df, x="Category", y="Values", title="Kategoriehäufigkeiten")
-        )),
-    ]),
-    dbc.Row(dbc.Col(html.P("Diese Grafik zeigt die Häufigkeiten bestimmter Wörter im Zeitverlauf."))),
+# Projects Section now contains research questions and actual data visualizations
+projects_section = html.Div(id="projects", children=[
+    dbc.Container([
+        dbc.Row([
+            dbc.Col(html.H2("Research Questions", style={"color": "#9b0a7d"}), className="mt-5 mb-4 text-center"),
+        ]),
+
+        # Research Question 1: Changes in Word Usage (using real data)
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 1: Changes in Word Usage in Scientific Papers"), width=6),
+            dbc.Col(html.P(
+                "How has the usage of specific words in scientific papers changed since the introduction of ChatGPT? "
+                "This analysis aims to identify whether certain terms have become more or less frequent, potentially due to the influence of ChatGPT.")),
+        ]),
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="word-usage-graph",
+                figure=px.bar(df_word_usage, x="Year", y="Word_Count", color="Word_Type",
+                              title="Word Usage Over Time by Type")
+            )),
+        ], className="mb-5"),
+
+        # Research Question 2: Changes in the Use of Question Words
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 2: Changes in the Use of Question Words"), width=6),
+            dbc.Col(html.P(
+                "What changes are there in the use of question words (e.g., what, why) in scientific papers since the introduction of ChatGPT? "
+                "This section explores the frequency of question words before and after 2022.")),
+        ]),
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="question-words-graph",
+                figure=px.pie(df_word_usage, names="Word_Type", values="Word_Count",
+                              title="Distribution of Question Words")
+            )),
+        ], className="mb-5"),
+
+        # Research Question 3: Sentence Length in Scientific Papers
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 3: Sentence Length in Scientific Papers"), width=6),
+            dbc.Col(html.P(
+                "How has the length of sentences in scientific papers changed since the introduction of ChatGPT? "
+                "We aim to investigate whether sentences have become longer or shorter post-ChatGPT.")),
+        ]),
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="sentence-length-graph",
+                figure=px.line(df_sentence_length, x="Year", y="Avg_Sentence_Length",
+                               title="Average Sentence Length Over Time")
+            )),
+        ], className="mb-5"),
+
+        # Research Question 4: Asia University Keyword Analysis
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 4: Keyword Frequency in Asia Universities"), width=6),
+            dbc.Col(html.P(
+                "This analysis explores how keyword usage has changed in Asian universities since the introduction of ChatGPT.")),
+        ]),
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="asia-keyword-graph",
+                figure=px.line(df_asia_data, x="Year", y="Keyword_Count",
+                               title="Keyword Count in Asian Universities Over Time")
+            )),
+        ], className="mb-5"),
+
+        # Research Question 5: Comparison Between CAU and Other Universities
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 5: Comparison Between CAU and Other Universities"), width=6),
+            dbc.Col(html.P(
+                "What are the differences between Christian-Albrechts-Universität zu Kiel (CAU) and other German universities regarding the perceived influence of ChatGPT? "
+                "This project compares the language changes at CAU with other institutions.")),
+        ]),
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="comparison-universities-graph",
+                figure=px.bar(df_word_usage, x="Year", y="Word_Count", color="Word_Type",
+                              title="Comparison of Word Usage Across Universities")
+            )),
+        ], className="mb-5"),
+
+        # Research Question 6: Faculty Differences at CAU
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 6: Faculty Differences at CAU"), width=6),
+            dbc.Col(html.P(
+                "How has word usage changed across different faculties at CAU since the introduction of ChatGPT? "
+                "This project analyzes differences between disciplines, such as natural sciences and humanities.")),
+        ]),
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="faculty-differences-graph",
+                figure=px.bar(df_word_usage, x="Year", y="Word_Count", color="Word_Type",
+                              title="Comparison of Word Usage by Faculty")
+            )),
+        ], className="mb-5"),
+
+        # Research Question 7: Global Comparison Between Universities
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 7: Global Comparison Between Universities"), width=6),
+            dbc.Col(html.P(
+                "How do the effects of ChatGPT on scientific papers differ between various universities worldwide? "
+                "This includes comparisons between top German universities, European, and Asian institutions.")),
+        ]),
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="global-comparison-graph",
+                figure=px.line(df_asia_data, x="Year", y="Keyword_Count", title="Global Comparison of Keyword Trends")
+            )),
+        ], className="mb-5"),
+
+    ], className="py-5")
 ])
 
-# Layout für Forschungsfrage 2: Veränderung der Fragewörter
-page2_layout = dbc.Container([
-    dbc.Row(dbc.Col(html.H2("Forschungsfrage 2: Veränderung der Fragewörter", style={"color": "#9b0a7d"}))),
-    dbc.Row(dbc.Col(html.P("Welche Veränderungen gibt es in der Nutzung von Fragewörtern in wissenschaftlichen Arbeiten seit der Einführung von ChatGPT?"))),
-    dbc.Row([
-        dbc.Col(dcc.Graph(
-            id="rq2-graph",
-            figure=px.pie(df, names="Category", values="Values", title="Verteilung von Fragewörtern")
-        )),
-    ]),
-    dbc.Row(dbc.Col(html.P("Diese Visualisierung zeigt die Verteilung von Fragewörtern in wissenschaftlichen Arbeiten."))),
-])
-
-# Layout für Forschungsfrage 3: Satzlängen in wissenschaftlichen Arbeiten
-page3_layout = dbc.Container([
-    dbc.Row(dbc.Col(html.H2("Forschungsfrage 3: Veränderung der Satzlängen", style={"color": "#9b0a7d"}))),
-    dbc.Row(dbc.Col(html.P("Wie haben sich die Satzlängen in wissenschaftlichen Arbeiten seit der Einführung von ChatGPT verändert?"))),
-    dbc.Row([
-        dbc.Col(dcc.Graph(
-            id="rq3-graph",
-            figure=px.line(asia_df, x="Year", y="KeywordCount", title="Satzlängenentwicklung")
-        )),
-    ]),
-    dbc.Row(dbc.Col(html.P("Diese Grafik zeigt die Veränderung der Satzlängen im Zeitverlauf."))),
-])
-
-# Layout für Forschungsfrage 4: Unterschiede zwischen Abstracts und vollständigen Texten
-page4_layout = dbc.Container([
-    dbc.Row(dbc.Col(html.H2("Forschungsfrage 4: Unterschiede zwischen Abstracts und Texten", style={"color": "#9b0a7d"}))),
-    dbc.Row(dbc.Col(html.P("Untersuchen, ob es Unterschiede in der sprachlichen Gestaltung zwischen Abstracts und vollständigen Texten gibt."))),
-    # Weitere Visualisierungen können hier hinzugefügt werden
-])
-
-# Layout für den Imprint-Bereich
-imprint_layout = dbc.Container([
-    dbc.Row(dbc.Col(html.H2("Kontakt", style={"color": "#9b0a7d"}))),
-    dbc.Row(dbc.Col(html.P("Autor: [Louis Krückmeyer, Matheus Kolzarek, Tom Skrzynski-Fox]"))),
-    dbc.Row(dbc.Col(html.P("Gruppe: [Joule im Pool]"))),
-])
-
-# Layout für Forschungsfrage 5: Unterschiede zwischen CAU und anderen Universitäten
-page5_layout = dbc.Container([
-    dbc.Row(dbc.Col(html.H2("Forschungsfrage 5: Vergleich CAU vs. andere Universitäten", style={"color": "#9b0a7d"}))),
-    dbc.Row(dbc.Col(html.P("Vergleich der vermeintlichen Beeinflussung durch ChatGPT zwischen der Christian-Albrechts-Universität zu Kiel (CAU) und anderen Universitäten."))),
-    # Weitere Visualisierungen können hier hinzugefügt werden
-])
-
-# Layout für Forschungsfrage 6: Vergleich zwischen Fakultäten der CAU
-page6_layout = dbc.Container([
-    dbc.Row(dbc.Col(html.H2("Forschungsfrage 6: Vergleich zwischen CAU-Fakultäten", style={"color": "#9b0a7d"}))),
-    dbc.Row(dbc.Col(html.P("Vergleich der Veränderungen in der Wortwahl zwischen verschiedenen Fakultäten der CAU seit der Einführung von ChatGPT."))),
-    # Weitere Visualisierungen können hier hinzugefügt werden
-])
-
-# Layout für Forschungsfrage 7: Vergleich globaler Universitäten
-page7_layout = dbc.Container([
-    dbc.Row(dbc.Col(html.H2("Forschungsfrage 7: Vergleich globaler Universitäten", style={"color": "#9b0a7d"}))),
-    dbc.Row(dbc.Col(html.P("Unterschiede zwischen verschiedenen Universitäten weltweit in Bezug auf die vermeintliche Beeinflussung durch ChatGPT."))),
-    # Weitere Visualisierungen können hier hinzugefügt werden
+# About Section
+about_section = html.Div(id="about", children=[
+    dbc.Container([
+        dbc.Row([
+            dbc.Col(html.H2("About Me", style={"color": "#9b0a7d"}), className="mt-5 mb-4 text-center"),
+        ]),
+        dbc.Row([
+            dbc.Col(html.P(
+                "Thank you for exploring our Page\n"
+                "This Date was presented by Louis Krückmeyer, Matheus Kolzarek and Tom Skrzynski-Fox.\n"
+                "This project was created to explore the impact of ChatGPT on scientific papers. \n"
+                "We hope you enjoyed the analysis and visualizations presented here. \n"
+                "Thank you for the great support and feedback Mirjam Bayer"
+            )),
+        ], className="text-center"),
+    ], className="py-5")
 ])
