@@ -28,9 +28,8 @@ df_asia_data = pd.DataFrame({
 df = pd.read_csv('Merged_EU_datasets_questionwords.csv')  # <-- INSERT YOUR FILE PATH HERE
 
 # Process the data
-df = df.dropna(subset=['Abstract', 'Publication_year'])
-df['Publication_year'] = df['Publication_year'].astype(int)
-
+df = df.dropna(subset=['PubDate'])
+df['PubDate'] = df['PubDate'].apply(lambda x: int(float(x)))  # Konvertiere 'YYYY.0' zu 'YYYY'
 # Define question words
 question_words = ['what', 'why', 'how', 'where', 'when', 'which', 'who', 'whom', 'whose']
 
