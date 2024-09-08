@@ -29,7 +29,11 @@ df = pd.read_csv('Merged_EU_datasets_questionwords.csv')  # <-- INSERT YOUR FILE
 
 # Process the data
 df = df.dropna(subset=['PubDate'])
-df['PubDate'] = df['PubDate'].apply(lambda x: int(float(x)))  # Konvertiere 'YYYY.0' zu 'YYYY'
+df['PubDate'] = df['PubDate'].apply(lambda x: int(float(x)))  # Convert 'YYYY.0' to 'YYYY'
+
+# Ensure that 'Abstract' column contains strings
+df['Abstract'] = df['Abstract'].fillna('').astype(str)
+
 # Define question words
 question_words = ['what', 'why', 'how', 'where', 'when', 'which', 'who', 'whom', 'whose']
 
@@ -39,12 +43,13 @@ def count_question_words(text):
     count = sum(1 for word in words if word in question_words)
     return count
 
+# Apply the function
 df['Question_Word_Count'] = df['Abstract'].apply(count_question_words)
 df['Question_Mark_Count'] = df['Abstract'].apply(lambda x: x.count('?'))
 
-# Split data into periods
-df_before_2023 = df[df['Publication_year'] < 2023]
-df_after_2023 = df[df['Publication_year'] >= 2023]
+# Split data into periods using 'PubDate'
+df_before_2023 = df[df['PubDate'] < 2023]
+df_after_2023 = df[df['PubDate'] >= 2023]
 
 # Mann-Whitney U test for question words
 stat, p_value = mannwhitneyu(df_before_2023['Question_Word_Count'], df_after_2023['Question_Word_Count'])
@@ -235,3 +240,9 @@ about_section = html.Div(id="about", children=[
     ], className="py-5")
 ])
 
+# The final layout combining all sections
+#app_layout = html.Div([homepage, projects_section, about_section])
+
+# Assuming you've already initialized your Dash app instance as `app`
+# Uncomment the following line when you run it locally:
+# app.layout = app_layout
