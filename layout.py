@@ -25,7 +25,7 @@ df_asia_data = pd.DataFrame({
 
 # --- Research Question 2 Data and Analysis ---
 # Load your data here by replacing 'your_data.csv' with the actual file path
-df = pd.read_csv('Merged_EU_datasets.csv')  # <-- INSERT YOUR FILE PATH HERE
+df = pd.read_csv('Merged_EU_datasets_questionwords.csv')  # <-- INSERT YOUR FILE PATH HERE
 
 # Process the data
 df = df.dropna(subset=['Abstract', 'Publication_year'])
