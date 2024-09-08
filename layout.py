@@ -120,30 +120,28 @@ projects_section = html.Div(id="projects", children=[
         # Research Question 2: Changes in the Use of Question Words
         dbc.Container([
             dbc.Row([
-                dbc.Col(html.H2("Research Question 2: Changes in the Use of Question Words", style={"color": "#9b0a7d"}), width=12),
-            ], className="mt-5 mb-4 text-center"),
+                dbc.Col(html.H4("Research Question 2: Total Question Word Count Before and After 2023"), width=12),
+            ]),
             dbc.Row([
-                dbc.Col(html.P(
-                    "Welche Veränderungen gibt es in der Verwendung von Fragewörtern (z.B. was, warum) in wissenschaftlichen Arbeiten seit der Einführung von ChatGPT? "
-                    "Dieser Abschnitt untersucht die Häufigkeit von Fragewörtern vor und nach 2023."
+                dbc.Col(dcc.Graph(
+                    id="total-word-counts",
+                    figure=fig_question_words
                 ), width=12),
             ]),
-            dbc.Row([
-                dbc.Col(dcc.Graph(
-                    id="question-words-graph",
-                    figure=fig_question_words
-                ), width=6),
-                dbc.Col(dcc.Graph(
-                    id="question-marks-graph",
-                    figure=fig_question_marks
-                ), width=6),
-            ]),
-            dbc.Row([
-                dbc.Col(html.P(f"Mann-Whitney U Test p-Wert für Fragewörter: {p_value:.4f}"), width=6),
-                dbc.Col(html.P(f"Mann-Whitney U Test p-Wert für Fragezeichen: {p_value_qm:.4f}"), width=6),
-            ], className="mt-3"),
         ], className="mb-5"),
 
+        # Intermediate Result for Total Question Marks
+        dbc.Container([
+            dbc.Row([
+                dbc.Col(html.H4("Intermediate Result: Total Question Marks Before and After 2023"), width=12),
+            ]),
+            dbc.Row([
+                dbc.Col(dcc.Graph(
+                    id="total-marks-counts",
+                    figure=fig_question_marks
+                ), width=12),
+            ]),
+        ], className="mb-5"),        # Add more sections for additional intermediate results as needed..
         # Research Question 3: Sentence Length in Scientific Papers
         dbc.Row([
             dbc.Col(html.H4("Research Question 3: Sentence Length in Scientific Papers"), width=6),
