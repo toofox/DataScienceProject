@@ -162,120 +162,9 @@ projects_section = html.Div(id="projects", children=[
         dbc.Row([
             dbc.Col(html.H2("Research Questions", style={"color": "#9b0a7d"}), className="mt-5 mb-4 text-center"),
         ]),
-    ])
-])
 
 
         # Research Question 1: Changes in Word Usage (using real data)
-
-# CSV-Dateien einlesen
-#df_universities = pd.read_csv('Data/Merged_Germany_datasets.csv')
-#df_fachhochschulen = pd.read_csv('Data/Merged_FH_datasets.csv')
-#df_eu = pd.read_csv('Data/Merged_EU_datasets.csv')
-#df_asia = pd.read_csv('Data/Merged_Asia_datasets.csv')
-
-# Funktion zur Extraktion der Wörter und ihrer Häufigkeiten aus der "found_words"-Spalte
-
-
-def extract_words(text):
-    pattern = r'(\w+)\s*\((\d+)\)'
-    found = re.findall(pattern, text)
-    return Counter({word: int(count) for word, count in found})
-
-
-# Funktion zur Erstellung der DataFrames für Pre- und Post-ChatGPT
-def process_data(df):
-    df = df.dropna(subset=['PubDate'])
-    df['PubDate'] = pd.to_datetime(df['PubDate'], format='%Y', errors='coerce')
-
-    # Zeitraum vor ChatGPT (bis einschließlich 2022)
-    pre_chatgpt = df[df['PubDate'].dt.year <= 2022]
-
-    # Zeitraum mit ChatGPT (ab 2023 bis heute)
-    post_chatgpt = df[df['PubDate'].dt.year >= 2023]
-
-    # Wörter und ihre Häufigkeit zählen für beide Zeiträume
-    pre_chatgpt_words = Counter()
-    post_chatgpt_words = Counter()
-
-    for words in pre_chatgpt['found_words'].dropna():
-        pre_chatgpt_words.update(extract_words(words))
-
-    for words in post_chatgpt['found_words'].dropna():
-        post_chatgpt_words.update(extract_words(words))
-
-    # Berechne die Gesamtzahl der Wörter in jedem Zeitraum
-    total_pre_chatgpt_words = sum(pre_chatgpt_words.values())
-    total_post_chatgpt_words = sum(post_chatgpt_words.values())
-
-    # Berechne die relativen Häufigkeiten für jedes Wort
-    pre_chatgpt_relative = {word: count / total_pre_chatgpt_words for word, count in pre_chatgpt_words.items()}
-    post_chatgpt_relative = {word: count / total_post_chatgpt_words for word, count in post_chatgpt_words.items()}
-
-    # Erstelle DataFrame für die Visualisierung
-    words_df = pd.DataFrame({
-        'Word': list(pre_chatgpt_relative.keys()),
-        'Pre_ChatGPT (bis 2022)': [pre_chatgpt_relative.get(word, 0) for word in pre_chatgpt_relative],
-        'Post_ChatGPT (ab 2023)': [post_chatgpt_relative.get(word, 0) for word in pre_chatgpt_relative]
-    })
-
-    return words_df
-
-
-# DataFrames für jede CSV-Datei
-words_df_universities = process_data(df_universities)
-words_df_fachhochschulen = process_data(df_fachhochschulen)
-words_df_eu = process_data(df_eu)
-words_df_asia = process_data(df_asia)
-
-# Plotly-Grafiken für jede CSV-Datei
-fig_universities = px.bar(words_df_universities, x='Word', y=['Pre_ChatGPT (bis 2022)', 'Post_ChatGPT (ab 2023)'],
-                          barmode='group', title="Relative Wortverwendung: Universitäten")
-fig_fachhochschulen = px.bar(words_df_fachhochschulen, x='Word', y=['Pre_ChatGPT (bis 2022)', 'Post_ChatGPT (ab 2023)'],
-                             barmode='group', title="Relative Wortverwendung: Fachhochschulen")
-fig_eu = px.bar(words_df_eu, x='Word', y=['Pre_ChatGPT (bis 2022)', 'Post_ChatGPT (ab 2023)'],
-                barmode='group', title="Relative Wortverwendung: EU")
-fig_asia = px.bar(words_df_asia, x='Word', y=['Pre_ChatGPT (bis 2022)', 'Post_ChatGPT (ab 2023)'],
-                  barmode='group', title="Relative Wortverwendung: Asien")
-
-# Research Question 1 Section mit separaten Diagrammen
-research_question_1_section = html.Div(id="research-question-1", children=[
-    dbc.Container([
-        dbc.Row([
-            dbc.Col(html.H4("Research Question 1: Changes in Word Usage in Scientific Papers"), width=6),
-            dbc.Col(html.P(
-                "How has the usage of specific words in scientific papers changed since the introduction of ChatGPT? "
-                "This analysis explores the frequency of certain words before and after 2022.")),
-        ]),
-        # Diagramm für Universitäten
-        dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="word-usage-universities",
-                figure=fig_universities
-            )),
-        ], className="mb-5"),
-        # Diagramm für Fachhochschulen
-        dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="word-usage-fachhochschulen",
-                figure=fig_fachhochschulen
-            )),
-        ], className="mb-5"),
-        # Diagramm für EU
-        dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="word-usage-eu",
-                figure=fig_eu
-            )),
-        ], className="mb-5"),
-        # Diagramm für Asien
-        dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="word-usage-asia",
-                figure=fig_asia
-            )),
-        ], className="mb-5"),
-    ], className="py-5"),
 
         # Research Question 2: Changes in the Use of Question Words
         dbc.Row([
@@ -461,6 +350,7 @@ research_question_1_section = html.Div(id="research-question-1", children=[
             )),
         ], className="mb-5"),
     ], className="py-5")
+])
 
 # About Section
 about_section = html.Div(id="about", children=[
