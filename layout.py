@@ -8,6 +8,70 @@ import pandas as pd
 # df_bsp = pd.read_csv('your_file.csv')
 # df_bsp.head({Anzahl der Zeilen, die angezeigt werden sollen})
 
+
+
+
+
+#DATEN AUS CSV
+#Frage 7.1
+colors_blind_friendly = ['#E69F00', '#56B4E9', '#009E73', '#F0E442', '#0072B2', '#D55E00', '#CC79A7']
+df_universities = pd.read_csv('Data/Merged_Germany_datasets.csv')
+df_fachhochschulen = pd.read_csv('Data/Merged_FH_datasets.csv')
+df_universities['type'] = 'Universität'
+df_fachhochschulen['type'] = 'Fachhochschule'
+df_combined = pd.concat([df_universities, df_fachhochschulen])
+df_combined['flag'] = df_combined['flag'].apply(lambda x: 'Flagged' if x == 'Yes' else 'Not Flagged')
+
+# Neue Spalte, die angibt, ob das Paper vor oder nach dem 1.1.2023 publiziert wurde
+df_combined['DateCategory'] = df_combined['PubDate'].apply(lambda x: 'Before 1.1.2023' if x < 2023 else 'After 1.1.2023')
+
+# Aggregation: Anzahl der markierten Artikel pro Kategorie (Universität oder Fachhochschule)
+df_grouped = df_combined.groupby(['type', 'flag']).size().reset_index(name='count')
+
+# Berechnung der Gesamtzahl der Paper pro Typ (Universität/Fachhochschule)
+df_total = df_combined.groupby('type').size().reset_index(name='total_count')
+
+# Verknüpfe die Gesamtzahlen mit den gruppierten Daten
+df_grouped = pd.merge(df_grouped, df_total, on='type')
+
+# Berechne den Prozentsatz der markierten Artikel
+df_grouped['percentage'] = (df_grouped['count'] / df_grouped['total_count']) * 100
+
+# Filtere nur die markierten Artikel (Flagged)
+df_flagged = df_grouped[df_grouped['flag'] == 'Flagged']
+
+# Aggregation nach der Publikationsdatum-Kategorie (vor und nach 1.1.2023) für markierte Artikel
+df_date_grouped = df_combined[df_combined['flag'] == 'Flagged'].groupby(['type', 'DateCategory']).size().reset_index(name='count')
+
+# Berechnung der Gesamtzahl der Paper nach Publikationsdatum für den Prozentsatz
+df_total_date = df_combined.groupby(['type', 'DateCategory']).size().reset_index(name='total_count')
+
+# Verknüpfen der Gesamtzahlen mit den gruppierten Daten
+df_date_grouped = pd.merge(df_date_grouped, df_total_date, on=['type', 'DateCategory'])
+
+# Berechnung des Prozentsatzes
+df_date_grouped['percentage'] = (df_date_grouped['count'] / df_date_grouped['total_count']) * 100
+# Filter für die Jahre 2021-2024
+df_filtered_years = df_combined[df_combined['PubDate'].isin([2017,2018,2019,2020, 2021, 2022, 2023, 2024])]
+
+# Aggregation der markierten Paper nach Jahr und Institutionstyp
+df_year_grouped = df_filtered_years[df_filtered_years['flag'] == 'Flagged'].groupby(['type', 'PubDate']).size().reset_index(name='count')
+
+# Berechnung der Gesamtzahl der Paper pro Jahr für den Prozentsatz
+df_total_years = df_filtered_years.groupby(['type', 'PubDate']).size().reset_index(name='total_count')
+
+# Verknüpfen der Gesamtzahlen mit den gruppierten Daten
+df_year_grouped = pd.merge(df_year_grouped, df_total_years, on=['type', 'PubDate'])
+
+# Berechnung des Prozentsatzes
+df_year_grouped['percentage'] = (df_year_grouped['count'] / df_year_grouped['total_count']) * 100
+
+
+
+
+
+
+
 # Example CSV data
 df_word_usage = pd.DataFrame({
     'Year': ['2020', '2021', '2022'],
@@ -25,7 +89,6 @@ df_asia_data = pd.DataFrame({
     'Keyword_Count': [1200, 1300, 1500]
 })
 
-# Home Section (Intro and overview)
 # Home Section (Intro and overview)
 homepage = html.Div(id="start", children=[
     dbc.Container([
@@ -137,20 +200,60 @@ projects_section = html.Div(id="projects", children=[
             )),
         ], className="mb-5"),
 
-        # Research Question 7: Global Comparison Between Universities
+        # Research Question 7: Comparison Between Universities and Fachhochschulen (Percentage of Flagged Papers)
         dbc.Row([
-            dbc.Col(html.H4("Research Question 7: Global Comparison Between Universities"), width=6),
+            dbc.Col(html.H4("Research Question 7: Global Comparison Between Universities and Fachhochschulen"),
+                    width=6),
             dbc.Col(html.P(
                 "How do the effects of ChatGPT on scientific papers differ between various universities worldwide? "
-                "This includes comparisons between top German universities, European, and Asian institutions.")),
+                "This includes comparisons between top German universities and Fachhochschulen.")),
         ]),
         dbc.Row([
             dbc.Col(dcc.Graph(
-                id="global-comparison-graph",
-                figure=px.line(df_asia_data, x="Year", y="Keyword_Count", title="Global Comparison of Keyword Trends")
+                id="comparison-graph",
+                figure=px.bar(df_flagged, x='type', y='percentage', color='type',
+                              color_discrete_sequence=colors_blind_friendly,
+                              title="Percentage of Flagged Papers between Universities and Fachhochschulen",
+                              labels={'type': 'Institution Type', 'percentage': 'Percentage of Papers'})
             )),
         ], className="mb-5"),
 
+        # Comparison Before and After 1.1.2023
+        dbc.Row([
+            dbc.Col(html.H4("Research Question: Comparison of Papers Before and After 1.1.2023"), width=6),
+            dbc.Col(html.P(
+                "How has the percentage of flagged papers changed before and after 1.1.2023? "
+                "This graph shows a comparison of flagged papers before and after the introduction of ChatGPT.")),
+        ]),
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="date-comparison-graph",
+                figure=px.bar(df_date_grouped, x='type', y='percentage', color='DateCategory',
+                              color_discrete_sequence=colors_blind_friendly,
+                              title="Percentage of Flagged Papers Before and After 1.1.2023",
+                              barmode='group',
+                              labels={'type': 'Institution Type', 'percentage': 'Percentage of Papers',
+                                      'DateCategory': 'Publication Date Category'})
+            )),
+        ], className="mb-5"),
+
+        # Line graph for 2020-2024 flagged papers
+        dbc.Row([
+            dbc.Col(html.H4("Research Question: Flagged Papers from 2017 to 2024"), width=6),
+            dbc.Col(html.P(
+                "This graph shows the percentage of flagged papers from 2017 to 2024, separated by institution type.")),
+        ]),
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="year-comparison-graph",
+                figure=px.line(df_year_grouped, x='PubDate', y='percentage', color='type',
+                               color_discrete_sequence=colors_blind_friendly,
+                               title="Percentage of Flagged Papers from 2017 to 2024, separated by institution type.Frage ",
+                               labels={'PubDate': 'Publication Year', 'percentage': 'Percentage of Papers',
+                                       'type': 'Institution Type'})
+                .update_layout(xaxis=dict(tickmode='linear', dtick=1))  # Setzt nur ganze Zahlen als X-Achsen-Werte
+            )),
+        ], className="mb-5"),
     ], className="py-5")
 ])
 
