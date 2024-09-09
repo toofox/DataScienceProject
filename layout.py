@@ -166,6 +166,7 @@ projects_section = html.Div(id="projects", children=[
 
         # Research Question 1: Changes in Word Usage (using real data)
 
+
         # Research Question 2: Changes in the Use of Question Words
         dbc.Row([
             dbc.Col(html.H4("Research Question 2: Changes in the Use of Question Words"), width=6),
