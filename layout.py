@@ -203,6 +203,12 @@ df_asia_data = pd.DataFrame({
     'Keyword_Count': [1200, 1300, 1500]
 })
 
+######## Code for Research Question 1######
+
+
+
+
+############################################
 # Home Section (Intro and overview)
 homepage = html.Div(id="start", children=[
     dbc.Container([
@@ -227,7 +233,40 @@ projects_section = html.Div(id="projects", children=[
 
 
         # Research Question 1: Changes in Word Usage (using real data)
-
+        dbc.Row([
+            dbc.Col(html.H4("Research Question 1: Changes in Word Usage in Scientific Papers"), width=6),
+            dbc.Col(html.P(
+                "How has the usage of specific words in scientific papers changed since the introduction of ChatGPT? "
+                "This analysis explores the frequency of certain words before and after 2022.")),
+        ]),
+        # Diagramm für Universitäten
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="word-usage-universities",
+                figure=fig_universities
+            )),
+        ], className="mb-5"),
+        # Diagramm für Fachhochschulen
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="word-usage-fachhochschulen",
+                figure=fig_fachhochschulen
+            )),
+        ], className="mb-5"),
+        # Diagramm für EU
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="word-usage-eu",
+                figure=fig_eu
+            )),
+        ], className="mb-5"),
+        # Diagramm für Asien
+        dbc.Row([
+            dbc.Col(dcc.Graph(
+                id="word-usage-asia",
+                figure=fig_asia
+            )),
+        ], className="mb-5"),
 
         # Research Question 2: Changes in the Use of Question Words
         dbc.Row([
