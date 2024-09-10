@@ -190,6 +190,9 @@ slope, intercept, r_value, p_value, std_err = stats.linregress(years, percentage
 df_year_grouped_5['trend'] = intercept + slope * df_year_grouped_5['PubDate']
 title_with_p_value = f"Percentage of Flagged Papers for 2017-2024 (CAU vs Other Universities)\nTrend Line (p-value: {p_value:.4f})"
 
+# Research question 4
+df_RQ4_comparison = pd.read_csv('Data/RQ4_Comparison.csv')
+
 # Example CSV data
 df_word_usage = pd.DataFrame({
     'Year': ['2020', '2021', '2022'],
@@ -549,17 +552,21 @@ projects_section = html.Div(id="projects", children=[
             )),
         ], className="mb-5"),
 
-        # Research Question 4: Asia University Keyword Analysis
+        # Research Question 4: Comparison of Flagged Keywords in PDFs and Abstracts
         dbc.Row([
-            dbc.Col(html.H4("Research Question 4: Keyword Frequency in Asia Universities"), width=6),
+            dbc.Col(html.H4("Research Question 4: Comparison of PDF and abstract flagging"), width=6),
             dbc.Col(html.P(
-                "This analysis explores how keyword usage has changed in Asian universities since the introduction of ChatGPT.")),
+                "How often do certain keywords get flagged in papers?"
+                "Is there a correlation between flagged keywords in abstracts and pdf files?")),
         ]),
         dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="asia-keyword-graph",
-                figure=px.line(df_asia_data, x="Year", y="Keyword_Count",
-                               title="Keyword Count in Asian Universities Over Time")
+            dbc.Col(dcc.Graph(id="RQ4_comparison", figure=(
+            go.Figure(data=[
+                            go.Bar(name='Abstract Keywords', x=df_RQ4_comparison['index'], y=df_RQ4_comparison['rel_Abstracts']),
+                            go.Bar(name='PDF Keywords', x=df_RQ4_comparison['index'], y=df_RQ4_comparison['rel_PDF'])
+                            ])
+                            .update_layout(barmode='group')
+                )
             )),
         ], className="mb-5"),
 
