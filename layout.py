@@ -7,8 +7,9 @@ import numpy as np
 from collections import Counter
 import re
 import dash
-from scipy.stats import chi2_contingency
+from scipy.stats import chi2_contingency, shapiro, norm
 import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 
 #chatgpt:
 # Um  eigene CSV-Datei einzufügen, ersetzen Sie 'your_file.csv' durch den Pfad zu Ihrer CSV-Datei.
@@ -208,19 +209,19 @@ df_asia_data = pd.DataFrame({
 
 ######## Code for Research Question 1######
 
-# Code for the relative frequenzies
-
+# Relative Frequency Calculation for multiple regions
+# Function to extract words and their frequencies from the "found_words" column
 def extract_words(text):
     pattern = r'(\w+)\s*\((\d+)\)'
     found = re.findall(pattern, text)
     return Counter({word: int(count) for word, count in found})
 
-# Function to process word usage and perform Chi-Square test for two periods
-def process_word_usage(df_pre, df_post):
+# Function to calculate relative word frequencies
+def calculate_relative_frequencies(df_pre, df_post):
     pre_chatgpt_words = Counter()
     post_chatgpt_words = Counter()
 
-    # Iterate through rows and count the words for both periods
+    # Count words for both periods
     for words in df_pre['found_words'].dropna():
         pre_chatgpt_words.update(extract_words(words))
 
@@ -235,134 +236,204 @@ def process_word_usage(df_pre, df_post):
     pre_chatgpt_relative = {word: count / total_pre_chatgpt_words for word, count in pre_chatgpt_words.items()}
     post_chatgpt_relative = {word: count / total_post_chatgpt_words for word, count in post_chatgpt_words.items()}
 
-    # Synchronize the words so both lists have the same length
+    # Ensure both lists have the same words
     all_words = set(pre_chatgpt_relative.keys()).union(set(post_chatgpt_relative.keys()))
     pre_chatgpt_relative = {word: pre_chatgpt_relative.get(word, 0) for word in all_words}
     post_chatgpt_relative = {word: post_chatgpt_relative.get(word, 0) for word in all_words}
 
-    # Create a contingency table with the relative frequencies for the Chi-Square test
+    return pre_chatgpt_relative, post_chatgpt_relative, all_words
+
+# Calculate for all regions
+df_eu_pre = df_eu[df_eu['PubDate'] <= 2022]
+df_eu_post = df_eu[df_eu['PubDate'] >= 2023]
+pre_chatgpt_relative_eu, post_chatgpt_relative_eu, all_words_eu = calculate_relative_frequencies(df_eu_pre, df_eu_post)
+
+df_asia_pre = df_asia[df_asia['PubDate'] <= 2022]
+df_asia_post = df_asia[df_asia['PubDate'] >= 2023]
+pre_chatgpt_relative_asia, post_chatgpt_relative_asia, all_words_asia = calculate_relative_frequencies(df_asia_pre, df_asia_post)
+
+df_universities_pre = df_universities[df_universities['PubDate'] <= 2022]
+df_universities_post = df_universities[df_universities['PubDate'] >= 2023]
+pre_chatgpt_relative_universities, post_chatgpt_relative_universities, all_words_universities = calculate_relative_frequencies(df_universities_pre, df_universities_post)
+
+df_fachhochschulen_pre = df_fachhochschulen[df_fachhochschulen['PubDate'] <= 2022]
+df_fachhochschulen_post = df_fachhochschulen[df_fachhochschulen['PubDate'] >= 2023]
+pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, all_words_fachhochschulen = calculate_relative_frequencies(df_fachhochschulen_pre, df_fachhochschulen_post)
+
+# Function to generate bar chart for relative word usage
+def generate_relative_frequency_bar(pre_chatgpt_relative, post_chatgpt_relative, region_name):
+    # Convert the relative frequency data into a DataFrame
+    df = pd.DataFrame({
+        'Word': list(pre_chatgpt_relative.keys()),
+        'Pre_ChatGPT': list(pre_chatgpt_relative.values()),
+        'Post_ChatGPT': list(post_chatgpt_relative.values())
+    })
+
+    # Create bar chart using Plotly Express
+    fig = px.bar(
+        df,
+        x='Word',
+        y=['Pre_ChatGPT', 'Post_ChatGPT'],
+        title=f'Relative Word Usage Before and After ChatGPT ({region_name})',
+        barmode='group'
+    )
+
+    # Return the figure for use in Dash layout
+    return fig
+
+# Generate relative frequency bar charts for all regions
+
+# For EU region
+fig_bar_eu = generate_relative_frequency_bar(pre_chatgpt_relative_eu, post_chatgpt_relative_eu, "EU")
+
+# For Asia region
+fig_bar_asia = generate_relative_frequency_bar(pre_chatgpt_relative_asia, post_chatgpt_relative_asia, "Asia")
+
+# For Universities
+fig_bar_universities = generate_relative_frequency_bar(pre_chatgpt_relative_universities, post_chatgpt_relative_universities, "Universities")
+
+# For Fachhochschulen
+fig_bar_fachhochschulen = generate_relative_frequency_bar(pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, "Fachhochschulen")
+
+# Chi-Square Test for multiple regions
+# Function to perform the Chi-Square test using relative frequencies
+def perform_chi_square_test(pre_chatgpt_relative, post_chatgpt_relative, all_words):
+    # Create a contingency table
     contingency_table = pd.DataFrame({
         'Pre_ChatGPT': [pre_chatgpt_relative[word] for word in all_words],
         'Post_ChatGPT': [post_chatgpt_relative[word] for word in all_words]
     })
 
-    # Add small value to avoid zero frequencies (Laplace smoothing)
+    # Add a small value to avoid zero frequencies
     contingency_table += 1e-10
 
-    # Perform Chi-Square test
+    # Perform the Chi-Square test
     chi2, p, dof, expected = chi2_contingency(contingency_table)
 
-    return pre_chatgpt_relative, post_chatgpt_relative, chi2, p
+    return chi2, p
 
-# Processing for the EU region
-df_eu_pre = df_eu[df_eu['PubDate'] <= 2022]
-df_eu_post = df_eu[df_eu['PubDate'] >= 2023]
+# Perform the Chi-Square test for all regions
+chi2_eu, p_eu = perform_chi_square_test(pre_chatgpt_relative_eu, post_chatgpt_relative_eu, all_words_eu)
+chi2_asia, p_asia = perform_chi_square_test(pre_chatgpt_relative_asia, post_chatgpt_relative_asia, all_words_asia)
+chi2_universities, p_universities = perform_chi_square_test(pre_chatgpt_relative_universities, post_chatgpt_relative_universities, all_words_universities)
+chi2_fachhochschulen, p_fachhochschulen = perform_chi_square_test(pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, all_words_fachhochschulen)
 
-pre_chatgpt_relative_eu, post_chatgpt_relative_eu, chi2_eu, p_eu = process_word_usage(df_eu_pre, df_eu_post)
+# Function to generate the Chi-Square pie chart, always showing a visual regardless of p-value
+def generate_chi_square_pie(p_value, region_name):
+    # If p-value is 1.0, it means "No significant difference"
+    if p_value >= 0.05:
+        significant_label = "No significant difference"
+        significant_value = 1
+    else:
+        significant_label = "Significant difference"
+        significant_value = 1
 
-# Bar chart for EU
-fig_bar_eu = px.bar(
-    pd.DataFrame({
-        'Word': list(pre_chatgpt_relative_eu.keys()),
-        'Pre_ChatGPT': list(pre_chatgpt_relative_eu.values()),
-        'Post_ChatGPT': list(post_chatgpt_relative_eu.values())
-    }),
-    x='Word', y=['Pre_ChatGPT', 'Post_ChatGPT'],
-    title='Relative Word Usage Before and After ChatGPT (EU)',
-    barmode='group'
+    # Create pie chart
+    fig = go.Figure()
+
+    # Add pie chart trace
+    fig.add_trace(go.Pie(
+        labels=[significant_label, "Significant difference" if significant_label == "No significant difference" else "No significant difference"],
+        values=[significant_value, 0],  # Adjust the second value to ensure the visualization is balanced
+        hole=0.4  # Donut chart
+    ))
+
+    # Update layout for the chart
+    fig.update_layout(
+        title_text=f"Chi-Square Test Result for {region_name} (p-value: {p_value:.6f})",
+        annotations=[dict(text=significant_label, x=0.5, y=0.5, font_size=20, showarrow=False)]
+    )
+
+    return fig
+# Shapiro-Wilk Test for multiple regions
+
+# Function to perform the Shapiro-Wilk test for normality
+def perform_shapiro_test(pre_chatgpt_relative, post_chatgpt_relative):
+    pre_chatgpt_values = list(pre_chatgpt_relative.values())
+    post_chatgpt_values = list(post_chatgpt_relative.values())
+
+    shapiro_pre_result = None
+    shapiro_post_result = None
+
+    # Perform the Shapiro-Wilk test for Pre-ChatGPT data
+    if len(pre_chatgpt_values) >= 3:  # Shapiro-Wilk test requires at least 3 values
+        stat_pre, p_pre = shapiro(pre_chatgpt_values)
+        shapiro_pre_result = (stat_pre, p_pre)
+
+    # Perform the Shapiro-Wilk test for Post-ChatGPT data
+    if len(post_chatgpt_values) >= 3:
+        stat_post, p_post = shapiro(post_chatgpt_values)
+        shapiro_post_result = (stat_post, p_post)
+
+    return shapiro_pre_result, shapiro_post_result
+
+# Perform the Shapiro-Wilk test for all regions
+shapiro_pre_eu, shapiro_post_eu = perform_shapiro_test(pre_chatgpt_relative_eu, post_chatgpt_relative_eu)
+shapiro_pre_asia, shapiro_post_asia = perform_shapiro_test(pre_chatgpt_relative_asia, post_chatgpt_relative_asia)
+shapiro_pre_universities, shapiro_post_universities = perform_shapiro_test(pre_chatgpt_relative_universities, post_chatgpt_relative_universities)
+shapiro_pre_fachhochschulen, shapiro_post_fachhochschulen = perform_shapiro_test(pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen)
+
+# Function to plot Shapiro-Wilk Test histograms for normality visualization
+# Function to generate Plotly histogram for Shapiro-Wilk test
+def generate_shapiro_histogram_figure(pre_values, post_values, region_name):
+    # Create a figure for Plotly histogram
+    fig = go.Figure()
+
+    # Pre-ChatGPT histogram
+    fig.add_trace(go.Histogram(x=pre_values, name="Pre-ChatGPT", marker_color='green', opacity=0.75))
+
+    # Post-ChatGPT histogram
+    fig.add_trace(go.Histogram(x=post_values, name="Post-ChatGPT", marker_color='blue', opacity=0.75))
+
+    # Update layout
+    fig.update_layout(
+        title=f'Shapiro-Wilk Test Histogram for {region_name}',
+        barmode='overlay',
+        xaxis_title='Relative Frequency',
+        yaxis_title='Density',
+        legend_title="Time Period",
+        bargap=0.1,
+        bargroupgap=0.2
+    )
+
+    # Return the figure
+    return fig
+
+# Generate Chi-Square pie charts for all regions
+fig_pie_eu = generate_chi_square_pie(p_eu, "EU")
+fig_pie_asia = generate_chi_square_pie(p_asia, "Asia")
+fig_pie_universities = generate_chi_square_pie(p_universities, "Universities")
+fig_pie_fachhochschulen = generate_chi_square_pie(p_fachhochschulen, "Fachhochschulen")
+
+# Generate the Shapiro-Wilk histogram figures for all regions
+
+# EU region
+fig_shapiro_eu = generate_shapiro_histogram_figure(
+    list(pre_chatgpt_relative_eu.values()),
+    list(post_chatgpt_relative_eu.values()),
+    "EU"
 )
 
-# Pie chart for Chi-Square result (EU)
-fig_pie_eu = go.Figure()
-
-fig_pie_eu.add_trace(go.Pie(labels=['Significant', 'Not Significant'],
-                            values=[p_eu < 0.05, p_eu >= 0.05],
-                            hole=.3))
-
-fig_pie_eu.update_layout(title_text=f"Chi-Square Test Result (p-value: {p_eu:.4f})")
-
-# Processing for the Asia region
-df_asia_pre = df_asia[df_asia['PubDate'] <= 2022]
-df_asia_post = df_asia[df_asia['PubDate'] >= 2023]
-
-pre_chatgpt_relative_asia, post_chatgpt_relative_asia, chi2_asia, p_asia = process_word_usage(df_asia_pre, df_asia_post)
-
-# Bar chart for Asia
-fig_bar_asia = px.bar(
-    pd.DataFrame({
-        'Word': list(pre_chatgpt_relative_asia.keys()),
-        'Pre_ChatGPT': list(pre_chatgpt_relative_asia.values()),
-        'Post_ChatGPT': list(post_chatgpt_relative_asia.values())
-    }),
-    x='Word', y=['Pre_ChatGPT', 'Post_ChatGPT'],
-    title='Relative Word Usage Before and After ChatGPT (Asia)',
-    barmode='group'
+# Asia region
+fig_shapiro_asia = generate_shapiro_histogram_figure(
+    list(pre_chatgpt_relative_asia.values()),
+    list(post_chatgpt_relative_asia.values()),
+    "Asia"
 )
 
-# Pie chart for Chi-Square result (Asia)
-fig_pie_asia = go.Figure()
-
-fig_pie_asia.add_trace(go.Pie(labels=['Significant', 'Not Significant'],
-                              values=[p_asia < 0.05, p_asia >= 0.05],
-                              hole=.3))
-
-fig_pie_asia.update_layout(title_text=f"Chi-Square Test Result (p-value: {p_asia:.4f})")
-
-# Processing for Universities
-df_universities_pre = df_universities[df_universities['PubDate'] <= 2022]
-df_universities_post = df_universities[df_universities['PubDate'] >= 2023]
-
-pre_chatgpt_relative_universities, post_chatgpt_relative_universities, chi2_universities, p_universities = process_word_usage(df_universities_pre, df_universities_post)
-
-# Bar chart for Universities
-fig_bar_universities = px.bar(
-    pd.DataFrame({
-        'Word': list(pre_chatgpt_relative_universities.keys()),
-        'Pre_ChatGPT': list(pre_chatgpt_relative_universities.values()),
-        'Post_ChatGPT': list(post_chatgpt_relative_universities.values())
-    }),
-    x='Word', y=['Pre_ChatGPT', 'Post_ChatGPT'],
-    title='Relative Word Usage Before and After ChatGPT (Universities)',
-    barmode='group'
+# Universities region
+fig_shapiro_universities = generate_shapiro_histogram_figure(
+    list(pre_chatgpt_relative_universities.values()),
+    list(post_chatgpt_relative_universities.values()),
+    "Universities"
 )
 
-# Pie chart for Chi-Square result (Universities)
-fig_pie_universities = go.Figure()
-
-fig_pie_universities.add_trace(go.Pie(labels=['Significant', 'Not Significant'],
-                                      values=[p_universities < 0.05, p_universities >= 0.05],
-                                      hole=.3))
-
-fig_pie_universities.update_layout(title_text=f"Chi-Square Test Result (p-value: {p_universities:.4f})")
-
-# Processing for Fachhochschulen (Universities of Applied Sciences)
-df_fachhochschulen_pre = df_fachhochschulen[df_fachhochschulen['PubDate'] <= 2022]
-df_fachhochschulen_post = df_fachhochschulen[df_fachhochschulen['PubDate'] >= 2023]
-
-pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, chi2_fachhochschulen, p_fachhochschulen = process_word_usage(df_fachhochschulen_pre, df_fachhochschulen_post)
-
-# Bar chart for Fachhochschulen
-fig_bar_fachhochschulen = px.bar(
-    pd.DataFrame({
-        'Word': list(pre_chatgpt_relative_fachhochschulen.keys()),
-        'Pre_ChatGPT': list(pre_chatgpt_relative_fachhochschulen.values()),
-        'Post_ChatGPT': list(post_chatgpt_relative_fachhochschulen.values())
-    }),
-    x='Word', y=['Pre_ChatGPT', 'Post_ChatGPT'],
-    title='Relative Word Usage Before and After ChatGPT (Universities of Applied Sciences)',
-    barmode='group'
+# Fachhochschulen region
+fig_shapiro_fachhochschulen = generate_shapiro_histogram_figure(
+    list(pre_chatgpt_relative_fachhochschulen.values()),
+    list(post_chatgpt_relative_fachhochschulen.values()),
+    "Fachhochschulen"
 )
-
-# Pie chart for Chi-Square result (Fachhochschulen)
-fig_pie_fachhochschulen = go.Figure()
-
-fig_pie_fachhochschulen.add_trace(go.Pie(labels=['Significant', 'Not Significant'],
-                                         values=[p_fachhochschulen < 0.05, p_fachhochschulen >= 0.05],
-                                         hole=.3))
-
-fig_pie_fachhochschulen.update_layout(title_text=f"Chi-Square Test Result (p-value: {p_fachhochschulen:.4f})")
-
-# end of the code for the relative frequenzies and chi square test
 
 
 ############################################ end research question 1 ######
@@ -390,26 +461,63 @@ projects_section = html.Div(id="projects", children=[
         dbc.Row([
             dbc.Col(html.H2("Research Questions", style={"color": "#9b0a7d"}), className="mt-5 mb-4 text-center"),
         ]),
-
-
         # Research Question 1: Changes in Word Usage (using real data)
+
         # EU Section
         dbc.Row([dbc.Col(dcc.Graph(id="word-usage-bar-eu", figure=fig_bar_eu))], className="mb-5"),
         dbc.Row([dbc.Col(dcc.Graph(id="chi-square-pie-eu", figure=fig_pie_eu))], className="mb-5"),
+        dbc.Row([dbc.Col(dcc.Graph(id="shapiro-histogram-eu", figure=fig_shapiro_eu))], className="mb-5"),
+        dbc.Row([
+            dbc.Col(html.P(
+                f"Chi-Square p-value for EU: {p_eu:.6f}. {'Significant difference' if p_eu < 0.05 else 'No significant difference'}.")),
+            dbc.Col(html.P(
+                f"Shapiro-Wilk Test for Pre-ChatGPT EU: p-value = {shapiro_pre_eu[1]:.6f}. {'Not normal' if shapiro_pre_eu[1] < 0.05 else 'Normal distribution'}.")),
+            dbc.Col(html.P(
+                f"Shapiro-Wilk Test for Post-ChatGPT EU: p-value = {shapiro_post_eu[1]:.6f}. {'Not normal' if shapiro_post_eu[1] < 0.05 else 'Normal distribution'}.")),
+        ], className="mb-5"),
 
         # Asia Section
         dbc.Row([dbc.Col(dcc.Graph(id="word-usage-bar-asia", figure=fig_bar_asia))], className="mb-5"),
         dbc.Row([dbc.Col(dcc.Graph(id="chi-square-pie-asia", figure=fig_pie_asia))], className="mb-5"),
+        dbc.Row([dbc.Col(dcc.Graph(id="shapiro-histogram-asia", figure=fig_shapiro_asia))], className="mb-5"),
+        dbc.Row([
+            dbc.Col(html.P(
+                f"Chi-Square p-value for Asia: {p_asia:.6f}. {'Significant difference' if p_asia < 0.05 else 'No significant difference'}.")),
+            dbc.Col(html.P(
+                f"Shapiro-Wilk Test for Pre-ChatGPT Asia: p-value = {shapiro_pre_asia[1]:.6f}. {'Not normal' if shapiro_pre_asia[1] < 0.05 else 'Normal distribution'}.")),
+            dbc.Col(html.P(
+                f"Shapiro-Wilk Test for Post-ChatGPT Asia: p-value = {shapiro_post_asia[1]:.6f}. {'Not normal' if shapiro_post_asia[1] < 0.05 else 'Normal distribution'}.")),
+        ], className="mb-5"),
 
         # Universities Section
         dbc.Row([dbc.Col(dcc.Graph(id="word-usage-bar-universities", figure=fig_bar_universities))], className="mb-5"),
         dbc.Row([dbc.Col(dcc.Graph(id="chi-square-pie-universities", figure=fig_pie_universities))], className="mb-5"),
+        dbc.Row([dbc.Col(dcc.Graph(id="shapiro-histogram-universities", figure=fig_shapiro_universities))],
+                className="mb-5"),
+        dbc.Row([
+            dbc.Col(html.P(
+                f"Chi-Square p-value for Universities: {p_universities:.6f}. {'Significant difference' if p_universities < 0.05 else 'No significant difference'}.")),
+            dbc.Col(html.P(
+                f"Shapiro-Wilk Test for Pre-ChatGPT Universities: p-value = {shapiro_pre_universities[1]:.6f}. {'Not normal' if shapiro_pre_universities[1] < 0.05 else 'Normal distribution'}.")),
+            dbc.Col(html.P(
+                f"Shapiro-Wilk Test for Post-ChatGPT Universities: p-value = {shapiro_post_universities[1]:.6f}. {'Not normal' if shapiro_post_universities[1] < 0.05 else 'Normal distribution'}.")),
+        ], className="mb-5"),
 
         # Fachhochschulen Section
         dbc.Row([dbc.Col(dcc.Graph(id="word-usage-bar-fachhochschulen", figure=fig_bar_fachhochschulen))],
                 className="mb-5"),
         dbc.Row([dbc.Col(dcc.Graph(id="chi-square-pie-fachhochschulen", figure=fig_pie_fachhochschulen))],
                 className="mb-5"),
+        dbc.Row([dbc.Col(dcc.Graph(id="shapiro-histogram-fachhochschulen", figure=fig_shapiro_fachhochschulen))],
+                className="mb-5"),
+        dbc.Row([
+            dbc.Col(html.P(
+                f"Chi-Square p-value for Fachhochschulen: {p_fachhochschulen:.6f}. {'Significant difference' if p_fachhochschulen < 0.05 else 'No significant difference'}.")),
+            dbc.Col(html.P(
+                f"Shapiro-Wilk Test for Pre-ChatGPT Fachhochschulen: p-value = {shapiro_pre_fachhochschulen[1]:.6f}. {'Not normal' if shapiro_pre_fachhochschulen[1] < 0.05 else 'Normal distribution'}.")),
+            dbc.Col(html.P(
+                f"Shapiro-Wilk Test for Post-ChatGPT Fachhochschulen: p-value = {shapiro_post_fachhochschulen[1]:.6f}. {'Not normal' if shapiro_post_fachhochschulen[1] < 0.05 else 'Normal distribution'}.")),
+        ], className="mb-5"),
 
         # Research Question 2: Changes in the Use of Question Words
         dbc.Row([
