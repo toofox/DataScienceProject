@@ -8,6 +8,7 @@ from collections import Counter
 import re
 import dash
 from scipy.stats import chi2_contingency
+import plotly.graph_objects as go
 
 #chatgpt:
 # Um  eigene CSV-Datei einzufügen, ersetzen Sie 'your_file.csv' durch den Pfad zu Ihrer CSV-Datei.
