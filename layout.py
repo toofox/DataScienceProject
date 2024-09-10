@@ -246,6 +246,9 @@ def process_word_usage(df_pre, df_post):
         'Post_ChatGPT': [post_chatgpt_relative[word] for word in all_words]
     })
 
+    # Add small value to avoid zero frequencies (Laplace smoothing)
+    contingency_table += 1e-10
+
     # Perform Chi-Square test
     chi2, p, dof, expected = chi2_contingency(contingency_table)
 
