@@ -234,10 +234,15 @@ def process_word_usage(df_pre, df_post):
     pre_chatgpt_relative = {word: count / total_pre_chatgpt_words for word, count in pre_chatgpt_words.items()}
     post_chatgpt_relative = {word: count / total_post_chatgpt_words for word, count in post_chatgpt_words.items()}
 
+    # Synchronize the words so both lists have the same length
+    all_words = set(pre_chatgpt_relative.keys()).union(set(post_chatgpt_relative.keys()))
+    pre_chatgpt_relative = {word: pre_chatgpt_relative.get(word, 0) for word in all_words}
+    post_chatgpt_relative = {word: post_chatgpt_relative.get(word, 0) for word in all_words}
+
     # Create a contingency table with the relative frequencies for the Chi-Square test
     contingency_table = pd.DataFrame({
-        'Pre_ChatGPT': [pre_chatgpt_relative.get(word, 0) for word in pre_chatgpt_relative],
-        'Post_ChatGPT': [post_chatgpt_relative.get(word, 0) for word in pre_chatgpt_relative]
+        'Pre_ChatGPT': [pre_chatgpt_relative[word] for word in all_words],
+        'Post_ChatGPT': [post_chatgpt_relative[word] for word in all_words]
     })
 
     # Perform Chi-Square test
