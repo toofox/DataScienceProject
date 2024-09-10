@@ -206,77 +206,159 @@ df_asia_data = pd.DataFrame({
 
 ######## Code for Research Question 1######
 
-# Funktion zur Extraktion der Wörter und ihrer Häufigkeiten aus der "found_words"-Spalte
+# Code for the relative frequenzies
+
 def extract_words(text):
     pattern = r'(\w+)\s*\((\d+)\)'
     found = re.findall(pattern, text)
     return Counter({word: int(count) for word, count in found})
 
-# Wörter und ihre Häufigkeit zählen für beide Zeiträume
+# Function to process word usage and perform Chi-Square test for two periods
 def process_word_usage(df_pre, df_post):
     pre_chatgpt_words = Counter()
     post_chatgpt_words = Counter()
 
-    # Iteriere durch die Zeilen und zähle die Wörter für beide Zeiträume
+    # Iterate through rows and count the words for both periods
     for words in df_pre['found_words'].dropna():
         pre_chatgpt_words.update(extract_words(words))
 
     for words in df_post['found_words'].dropna():
         post_chatgpt_words.update(extract_words(words))
 
-    # Berechne die Gesamtzahl der Wörter in jedem Zeitraum
+    # Calculate the total number of words for each period
     total_pre_chatgpt_words = sum(pre_chatgpt_words.values())
     total_post_chatgpt_words = sum(post_chatgpt_words.values())
 
-    # Berechne die relativen Häufigkeiten für jedes Wort
+    # Calculate relative frequencies for each word
     pre_chatgpt_relative = {word: count / total_pre_chatgpt_words for word, count in pre_chatgpt_words.items()}
     post_chatgpt_relative = {word: count / total_post_chatgpt_words for word, count in post_chatgpt_words.items()}
 
-    # Bereite DataFrame zur Visualisierung vor
-    words_df = pd.DataFrame({
-        'Word': list(pre_chatgpt_relative.keys()),
-        'Pre_ChatGPT (bis 2022)': [pre_chatgpt_relative.get(word, 0) for word in pre_chatgpt_relative],
-        'Post_ChatGPT (ab 2023)': [post_chatgpt_relative.get(word, 0) for word in pre_chatgpt_relative]
+    # Create a contingency table with the relative frequencies for the Chi-Square test
+    contingency_table = pd.DataFrame({
+        'Pre_ChatGPT': [pre_chatgpt_relative.get(word, 0) for word in pre_chatgpt_relative],
+        'Post_ChatGPT': [post_chatgpt_relative.get(word, 0) for word in pre_chatgpt_relative]
     })
-    return words_df
 
-# Bereite die Daten für jede Kategorie (Universitäten, Fachhochschulen, EU, Asien) vor
-pre_chatgpt_universities = df_universities[df_universities['PubDate'] <= 2022]
-post_chatgpt_universities = df_universities[df_universities['PubDate'] >= 2023]
-words_df_universities = process_word_usage(pre_chatgpt_universities, post_chatgpt_universities)
+    # Perform Chi-Square test
+    chi2, p, dof, expected = chi2_contingency(contingency_table)
 
-pre_chatgpt_fachhochschulen = df_fachhochschulen[df_fachhochschulen['PubDate'] <= 2022]
-post_chatgpt_fachhochschulen = df_fachhochschulen[df_fachhochschulen['PubDate'] >= 2023]
-words_df_fachhochschulen = process_word_usage(pre_chatgpt_fachhochschulen, post_chatgpt_fachhochschulen)
+    return pre_chatgpt_relative, post_chatgpt_relative, chi2, p
 
-pre_chatgpt_eu = df_eu[df_eu['PubDate'] <= 2022]
-post_chatgpt_eu = df_eu[df_eu['PubDate'] >= 2023]
-words_df_eu = process_word_usage(pre_chatgpt_eu, post_chatgpt_eu)
+# Processing for the EU region
+df_eu_pre = df_eu[df_eu['PubDate'] <= 2022]
+df_eu_post = df_eu[df_eu['PubDate'] >= 2023]
 
-pre_chatgpt_asia = df_asia[df_asia['PubDate'] <= 2022]
-post_chatgpt_asia = df_asia[df_asia['PubDate'] >= 2023]
-words_df_asia = process_word_usage(pre_chatgpt_asia, post_chatgpt_asia)
+pre_chatgpt_relative_eu, post_chatgpt_relative_eu, chi2_eu, p_eu = process_word_usage(df_eu_pre, df_eu_post)
 
-# Erzeuge die Diagramme mit Plotly
-fig_universities = px.bar(words_df_universities, x='Word', y=['Pre_ChatGPT (bis 2022)', 'Post_ChatGPT (ab 2023)'],
-                          title='Relative Wortverwendung vor und nach der Einführung von ChatGPT (Universitäten)',
-                          barmode='group')
+# Bar chart for EU
+fig_bar_eu = px.bar(
+    pd.DataFrame({
+        'Word': list(pre_chatgpt_relative_eu.keys()),
+        'Pre_ChatGPT': list(pre_chatgpt_relative_eu.values()),
+        'Post_ChatGPT': list(post_chatgpt_relative_eu.values())
+    }),
+    x='Word', y=['Pre_ChatGPT', 'Post_ChatGPT'],
+    title='Relative Word Usage Before and After ChatGPT (EU)',
+    barmode='group'
+)
 
-fig_fachhochschulen = px.bar(words_df_fachhochschulen, x='Word', y=['Pre_ChatGPT (bis 2022)', 'Post_ChatGPT (ab 2023)'],
-                             title='Relative Wortverwendung vor und nach der Einführung von ChatGPT (Fachhochschulen)',
-                             barmode='group')
+# Pie chart for Chi-Square result (EU)
+fig_pie_eu = go.Figure()
 
-fig_eu = px.bar(words_df_eu, x='Word', y=['Pre_ChatGPT (bis 2022)', 'Post_ChatGPT (ab 2023)'],
-                title='Relative Wortverwendung vor und nach der Einführung von ChatGPT (EU)',
-                barmode='group')
+fig_pie_eu.add_trace(go.Pie(labels=['Significant', 'Not Significant'],
+                            values=[p_eu < 0.05, p_eu >= 0.05],
+                            hole=.3))
 
-fig_asia = px.bar(words_df_asia, x='Word', y=['Pre_ChatGPT (bis 2022)', 'Post_ChatGPT (ab 2023)'],
-                  title='Relative Wortverwendung vor und nach der Einführung von ChatGPT (Asien)',
-                  barmode='group')
+fig_pie_eu.update_layout(title_text=f"Chi-Square Test Result (p-value: {p_eu:.4f})")
+
+# Processing for the Asia region
+df_asia_pre = df_asia[df_asia['PubDate'] <= 2022]
+df_asia_post = df_asia[df_asia['PubDate'] >= 2023]
+
+pre_chatgpt_relative_asia, post_chatgpt_relative_asia, chi2_asia, p_asia = process_word_usage(df_asia_pre, df_asia_post)
+
+# Bar chart for Asia
+fig_bar_asia = px.bar(
+    pd.DataFrame({
+        'Word': list(pre_chatgpt_relative_asia.keys()),
+        'Pre_ChatGPT': list(pre_chatgpt_relative_asia.values()),
+        'Post_ChatGPT': list(post_chatgpt_relative_asia.values())
+    }),
+    x='Word', y=['Pre_ChatGPT', 'Post_ChatGPT'],
+    title='Relative Word Usage Before and After ChatGPT (Asia)',
+    barmode='group'
+)
+
+# Pie chart for Chi-Square result (Asia)
+fig_pie_asia = go.Figure()
+
+fig_pie_asia.add_trace(go.Pie(labels=['Significant', 'Not Significant'],
+                              values=[p_asia < 0.05, p_asia >= 0.05],
+                              hole=.3))
+
+fig_pie_asia.update_layout(title_text=f"Chi-Square Test Result (p-value: {p_asia:.4f})")
+
+# Processing for Universities
+df_universities_pre = df_universities[df_universities['PubDate'] <= 2022]
+df_universities_post = df_universities[df_universities['PubDate'] >= 2023]
+
+pre_chatgpt_relative_universities, post_chatgpt_relative_universities, chi2_universities, p_universities = process_word_usage(df_universities_pre, df_universities_post)
+
+# Bar chart for Universities
+fig_bar_universities = px.bar(
+    pd.DataFrame({
+        'Word': list(pre_chatgpt_relative_universities.keys()),
+        'Pre_ChatGPT': list(pre_chatgpt_relative_universities.values()),
+        'Post_ChatGPT': list(post_chatgpt_relative_universities.values())
+    }),
+    x='Word', y=['Pre_ChatGPT', 'Post_ChatGPT'],
+    title='Relative Word Usage Before and After ChatGPT (Universities)',
+    barmode='group'
+)
+
+# Pie chart for Chi-Square result (Universities)
+fig_pie_universities = go.Figure()
+
+fig_pie_universities.add_trace(go.Pie(labels=['Significant', 'Not Significant'],
+                                      values=[p_universities < 0.05, p_universities >= 0.05],
+                                      hole=.3))
+
+fig_pie_universities.update_layout(title_text=f"Chi-Square Test Result (p-value: {p_universities:.4f})")
+
+# Processing for Fachhochschulen (Universities of Applied Sciences)
+df_fachhochschulen_pre = df_fachhochschulen[df_fachhochschulen['PubDate'] <= 2022]
+df_fachhochschulen_post = df_fachhochschulen[df_fachhochschulen['PubDate'] >= 2023]
+
+pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, chi2_fachhochschulen, p_fachhochschulen = process_word_usage(df_fachhochschulen_pre, df_fachhochschulen_post)
+
+# Bar chart for Fachhochschulen
+fig_bar_fachhochschulen = px.bar(
+    pd.DataFrame({
+        'Word': list(pre_chatgpt_relative_fachhochschulen.keys()),
+        'Pre_ChatGPT': list(pre_chatgpt_relative_fachhochschulen.values()),
+        'Post_ChatGPT': list(post_chatgpt_relative_fachhochschulen.values())
+    }),
+    x='Word', y=['Pre_ChatGPT', 'Post_ChatGPT'],
+    title='Relative Word Usage Before and After ChatGPT (Universities of Applied Sciences)',
+    barmode='group'
+)
+
+# Pie chart for Chi-Square result (Fachhochschulen)
+fig_pie_fachhochschulen = go.Figure()
+
+fig_pie_fachhochschulen.add_trace(go.Pie(labels=['Significant', 'Not Significant'],
+                                         values=[p_fachhochschulen < 0.05, p_fachhochschulen >= 0.05],
+                                         hole=.3))
+
+fig_pie_fachhochschulen.update_layout(title_text=f"Chi-Square Test Result (p-value: {p_fachhochschulen:.4f})")
+
+# end of the code for the relative frequenzies and chi square test
+
+
+############################################ end research question 1 ######
 
 
 
-############################################
 # Home Section (Intro and overview)
 homepage = html.Div(id="start", children=[
     dbc.Container([
@@ -301,40 +383,23 @@ projects_section = html.Div(id="projects", children=[
 
 
         # Research Question 1: Changes in Word Usage (using real data)
-        dbc.Row([
-            dbc.Col(html.H4("Research Question 1: Changes in Word Usage in Scientific Papers"), width=6),
-            dbc.Col(html.P(
-                "How has the usage of specific words in scientific papers changed since the introduction of ChatGPT? "
-                "This analysis explores the frequency of certain words before and after 2022.")),
-        ]),
-        # Diagramm für Universitäten
-        dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="word-usage-universities",
-                figure=fig_universities
-            )),
-        ], className="mb-5"),
-        # Diagramm für Fachhochschulen
-        dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="word-usage-fachhochschulen",
-                figure=fig_fachhochschulen
-            )),
-        ], className="mb-5"),
-        # Diagramm für EU
-        dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="word-usage-eu",
-                figure=fig_eu
-            )),
-        ], className="mb-5"),
-        # Diagramm für Asien
-        dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="word-usage-asia",
-                figure=fig_asia
-            )),
-        ], className="mb-5"),
+        # EU Section
+        dbc.Row([dbc.Col(dcc.Graph(id="word-usage-bar-eu", figure=fig_bar_eu))], className="mb-5"),
+        dbc.Row([dbc.Col(dcc.Graph(id="chi-square-pie-eu", figure=fig_pie_eu))], className="mb-5"),
+
+        # Asia Section
+        dbc.Row([dbc.Col(dcc.Graph(id="word-usage-bar-asia", figure=fig_bar_asia))], className="mb-5"),
+        dbc.Row([dbc.Col(dcc.Graph(id="chi-square-pie-asia", figure=fig_pie_asia))], className="mb-5"),
+
+        # Universities Section
+        dbc.Row([dbc.Col(dcc.Graph(id="word-usage-bar-universities", figure=fig_bar_universities))], className="mb-5"),
+        dbc.Row([dbc.Col(dcc.Graph(id="chi-square-pie-universities", figure=fig_pie_universities))], className="mb-5"),
+
+        # Fachhochschulen Section
+        dbc.Row([dbc.Col(dcc.Graph(id="word-usage-bar-fachhochschulen", figure=fig_bar_fachhochschulen))],
+                className="mb-5"),
+        dbc.Row([dbc.Col(dcc.Graph(id="chi-square-pie-fachhochschulen", figure=fig_pie_fachhochschulen))],
+                className="mb-5"),
 
         # Research Question 2: Changes in the Use of Question Words
         dbc.Row([
