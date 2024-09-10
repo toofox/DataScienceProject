@@ -7,6 +7,7 @@ import numpy as np
 from collections import Counter
 import re
 import dash
+from scipy.stats import chi2_contingency
 
 #chatgpt:
 # Um  eigene CSV-Datei einzufügen, ersetzen Sie 'your_file.csv' durch den Pfad zu Ihrer CSV-Datei.
