@@ -6,6 +6,7 @@ from scipy import stats
 import numpy as np
 from collections import Counter
 import re
+import dash
 
 #chatgpt:
 # Um  eigene CSV-Datei einzufügen, ersetzen Sie 'your_file.csv' durch den Pfad zu Ihrer CSV-Datei.
@@ -205,6 +206,73 @@ df_asia_data = pd.DataFrame({
 
 ######## Code for Research Question 1######
 
+# Funktion zur Extraktion der Wörter und ihrer Häufigkeiten aus der "found_words"-Spalte
+def extract_words(text):
+    pattern = r'(\w+)\s*\((\d+)\)'
+    found = re.findall(pattern, text)
+    return Counter({word: int(count) for word, count in found})
+
+# Wörter und ihre Häufigkeit zählen für beide Zeiträume
+def process_word_usage(df_pre, df_post):
+    pre_chatgpt_words = Counter()
+    post_chatgpt_words = Counter()
+
+    # Iteriere durch die Zeilen und zähle die Wörter für beide Zeiträume
+    for words in df_pre['found_words'].dropna():
+        pre_chatgpt_words.update(extract_words(words))
+
+    for words in df_post['found_words'].dropna():
+        post_chatgpt_words.update(extract_words(words))
+
+    # Berechne die Gesamtzahl der Wörter in jedem Zeitraum
+    total_pre_chatgpt_words = sum(pre_chatgpt_words.values())
+    total_post_chatgpt_words = sum(post_chatgpt_words.values())
+
+    # Berechne die relativen Häufigkeiten für jedes Wort
+    pre_chatgpt_relative = {word: count / total_pre_chatgpt_words for word, count in pre_chatgpt_words.items()}
+    post_chatgpt_relative = {word: count / total_post_chatgpt_words for word, count in post_chatgpt_words.items()}
+
+    # Bereite DataFrame zur Visualisierung vor
+    words_df = pd.DataFrame({
+        'Word': list(pre_chatgpt_relative.keys()),
+        'Pre_ChatGPT (bis 2022)': [pre_chatgpt_relative.get(word, 0) for word in pre_chatgpt_relative],
+        'Post_ChatGPT (ab 2023)': [post_chatgpt_relative.get(word, 0) for word in pre_chatgpt_relative]
+    })
+    return words_df
+
+# Bereite die Daten für jede Kategorie (Universitäten, Fachhochschulen, EU, Asien) vor
+pre_chatgpt_universities = df_universities[df_universities['PubDate'] <= 2022]
+post_chatgpt_universities = df_universities[df_universities['PubDate'] >= 2023]
+words_df_universities = process_word_usage(pre_chatgpt_universities, post_chatgpt_universities)
+
+pre_chatgpt_fachhochschulen = df_fachhochschulen[df_fachhochschulen['PubDate'] <= 2022]
+post_chatgpt_fachhochschulen = df_fachhochschulen[df_fachhochschulen['PubDate'] >= 2023]
+words_df_fachhochschulen = process_word_usage(pre_chatgpt_fachhochschulen, post_chatgpt_fachhochschulen)
+
+pre_chatgpt_eu = df_eu[df_eu['PubDate'] <= 2022]
+post_chatgpt_eu = df_eu[df_eu['PubDate'] >= 2023]
+words_df_eu = process_word_usage(pre_chatgpt_eu, post_chatgpt_eu)
+
+pre_chatgpt_asia = df_asia[df_asia['PubDate'] <= 2022]
+post_chatgpt_asia = df_asia[df_asia['PubDate'] >= 2023]
+words_df_asia = process_word_usage(pre_chatgpt_asia, post_chatgpt_asia)
+
+# Erzeuge die Diagramme mit Plotly
+fig_universities = px.bar(words_df_universities, x='Word', y=['Pre_ChatGPT (bis 2022)', 'Post_ChatGPT (ab 2023)'],
+                          title='Relative Wortverwendung vor und nach der Einführung von ChatGPT (Universitäten)',
+                          barmode='group')
+
+fig_fachhochschulen = px.bar(words_df_fachhochschulen, x='Word', y=['Pre_ChatGPT (bis 2022)', 'Post_ChatGPT (ab 2023)'],
+                             title='Relative Wortverwendung vor und nach der Einführung von ChatGPT (Fachhochschulen)',
+                             barmode='group')
+
+fig_eu = px.bar(words_df_eu, x='Word', y=['Pre_ChatGPT (bis 2022)', 'Post_ChatGPT (ab 2023)'],
+                title='Relative Wortverwendung vor und nach der Einführung von ChatGPT (EU)',
+                barmode='group')
+
+fig_asia = px.bar(words_df_asia, x='Word', y=['Pre_ChatGPT (bis 2022)', 'Post_ChatGPT (ab 2023)'],
+                  title='Relative Wortverwendung vor und nach der Einführung von ChatGPT (Asien)',
+                  barmode='group')
 
 
 
