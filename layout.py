@@ -26,7 +26,7 @@ from ast import literal_eval
 
 #DATEN AUS CSV
 #Frage 7.1
-colors_blind_friendly = ['#E69F00', '#56B4E9', '#009E73', '#F0E442', '#0072B2', '#D55E00', '#CC79A7']
+colors_blind_friendly = ['#D55E00', '#0072B2', '#F0E442', '#009E73', '#E69F00', '#56B4E9', '#CC79A7', '#8E44AD', '#F39C12', '#1ABC9C', '#2C3E50', '#C0392B', '#2980B9', '#27AE60']
 df_universities = pd.read_csv('Data/Merged_Germany_datasets.csv')
 df_fachhochschulen = pd.read_csv('Data/Merged_FH_datasets.csv')
 df_universities['type'] = 'Universität'
@@ -87,7 +87,7 @@ slope_7_1, intercept_7_1, r_value_7_1, p_value_7_1, std_err_7_1 = stats.linregre
 df_year_grouped['trend_7_1'] = intercept_7_1 + slope_7_1 * df_year_grouped['PubDate']
 
 # Display the p-value in the graph title for Frage 7.1
-title_with_p_value_7_1 = f"Percentage of Flagged Papers for 2020-2024 (Universities vs Fachhochschulen)\nTrend Line (p-value: {p_value_7_1:.4f})"
+title_with_p_value_7_1 = f"Percentage of Flagged Papers for 2017-2024 (Universities vs Fachhochschulen)\nTrend Line (p-value: {p_value_7_1:.4f})"
 
 # 7.2 EU und Asien Vergleich
 df_eu = pd.read_csv('Data/Merged_EU_datasets.csv')
@@ -150,7 +150,7 @@ slope_7_2, intercept_7_2, r_value_7_2, p_value_7_2, std_err_7_2 = stats.linregre
 df_year_grouped_eu_asia['trend_7_2'] = intercept_7_2 + slope_7_2 * df_year_grouped_eu_asia['PubDate']
 
 # Display the p-value in the graph title for Frage 7.2
-title_with_p_value_7_2 = f"Percentage of Flagged Papers for 2020-2024 (EU vs Asia)\nTrend Line (p-value: {p_value_7_2:.4f})"
+title_with_p_value_7_2 = f"Percentage of Flagged Papers for 2017-2024 (EU vs Asia)\nTrend Line (p-value: {p_value_7_2:.4f})"
 
 #Frage 5
 df_kiel_uni_5 = pd.read_csv('Data/Kiel_Uni_arxiv_flag_updated.csv')
@@ -190,7 +190,10 @@ years = df_year_grouped_5['PubDate'].values
 percentages = df_year_grouped_5['percentage'].values
 slope, intercept, r_value, p_value, std_err = stats.linregress(years, percentages)
 df_year_grouped_5['trend'] = intercept + slope * df_year_grouped_5['PubDate']
-title_with_p_value = f"Percentage of Flagged Papers for 2020-2024 (CAU vs Other Universities)\nTrend Line (p-value: {p_value:.4f})"
+title_with_p_value = f"Percentage of Flagged Papers for 2017-2024 (CAU vs Other Universities)\nTrend Line (p-value: {p_value:.4f})"
+
+# Research question 4
+df_RQ4_comparison = pd.read_csv('Data/RQ4_Comparison.csv')
 
 # Example CSV data
 df_word_usage = pd.DataFrame({
@@ -1054,17 +1057,21 @@ projects_section = html.Div(id="projects", children=[
         dbc.Row([dbc.Col(html.H3("Fachhochschule - Words per Abstract"))]),
         dbc.Row([dbc.Col(dcc.Graph(figure=fig_fachhochschule_word_counts))], className="mb-5"),
 
-        # Research Question 4: Asia University Keyword Analysis
+        # Research Question 4: Comparison of Flagged Keywords in PDFs and Abstracts
         dbc.Row([
-            dbc.Col(html.H4("Research Question 4: Keyword Frequency in Asia Universities"), width=6),
+            dbc.Col(html.H4("Research Question 4: Comparison of PDF and abstract flagging"), width=6),
             dbc.Col(html.P(
-                "This analysis explores how keyword usage has changed in Asian universities since the introduction of ChatGPT.")),
+                "How often do certain keywords get flagged in papers?"
+                "Is there a correlation between flagged keywords in abstracts and pdf files?")),
         ]),
         dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="asia-keyword-graph",
-                figure=px.line(df_asia_data, x="Year", y="Keyword_Count",
-                               title="Keyword Count in Asian Universities Over Time")
+            dbc.Col(dcc.Graph(id="RQ4_comparison", figure=(
+            go.Figure(data=[
+                            go.Bar(name='Abstract Keywords', x=df_RQ4_comparison['index'], y=df_RQ4_comparison['rel_Abstracts']),
+                            go.Bar(name='PDF Keywords', x=df_RQ4_comparison['index'], y=df_RQ4_comparison['rel_PDF'])
+                            ])
+                            .update_layout(barmode='group')
+                )
             )),
         ], className="mb-5"),
 
@@ -1176,9 +1183,9 @@ projects_section = html.Div(id="projects", children=[
 
         # Line graph for 2020-2024 flagged papers (Research Question 7.1)
         dbc.Row([
-            dbc.Col(html.H4("Research Question 7.1: Flagged Papers for 2020-2024"), width=6),
+            dbc.Col(html.H4("Research Question 7.1: Flagged Papers for 2017-2024"), width=6),
             dbc.Col(html.P(
-                "This graph shows the percentage of flagged papers from 2020 to 2024, separated by institution type.")),
+                "This graph shows the percentage of flagged papers from 2017 to 2024, separated by institution type.")),
         ]),
         dbc.Row([
             dbc.Col(dcc.Graph(
@@ -1231,9 +1238,9 @@ projects_section = html.Div(id="projects", children=[
 
         # Line graph for 2020-2024 flagged papers (Research Question 7.2)
         dbc.Row([
-            dbc.Col(html.H4("Research Question 7.2: Flagged Papers for 2020-2024 (EU and Asia)"), width=6),
+            dbc.Col(html.H4("Research Question 7.2: Flagged Papers for 2017-2024 (EU and Asia)"), width=6),
             dbc.Col(html.P(
-                "This graph shows the percentage of flagged papers from 2020 to 2024, separated by institution type (EU and Asia).")),
+                "This graph shows the percentage of flagged papers from 2017 to 2024, separated by institution type (EU and Asia).")),
         ]),
         dbc.Row([
             dbc.Col(dcc.Graph(
