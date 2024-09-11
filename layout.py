@@ -128,7 +128,7 @@ def task_workflow(df, years_range, task_title):
 
 # Assuming df_combined is the merged dataframe of universities and Fachhochschulen
 fig_bar_7_1, fig_line_7_1 = task_workflow(df_combined_Uni_FH, [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024], "Universities vs Fachhochschulen")
-fig_bar_7_2, fig_line_7_2 = task_workflow(df_combined_eu_asia, [2017,2018,2019,2020,2021,2022,2023,2024], "EU vs Asia")
+#fig_bar_7_2, fig_line_7_2 = task_workflow(df_combined_eu_asia, [2017,2018,2019,2020,2021,2022,2023,2024], "EU vs Asia")
 
 # Now you can add these figures to your layout, e.g.,
 # dbc.Row([dbc.Col(dcc.Graph(figure=fig_bar_7_1))]),
