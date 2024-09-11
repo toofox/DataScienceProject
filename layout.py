@@ -190,6 +190,10 @@ slope, intercept, r_value, p_value, std_err = stats.linregress(years, percentage
 df_year_grouped_5['trend'] = intercept + slope * df_year_grouped_5['PubDate']
 title_with_p_value = f"Percentage of Flagged Papers for 2020-2024 (CAU vs Other Universities)\nTrend Line (p-value: {p_value:.4f})"
 
+
+##### RQ6 Import
+RQ_6_df = pd.read_csv('Data/RQ6_faculty_keyword.csv')
+
 # Example CSV data
 df_word_usage = pd.DataFrame({
     'Year': ['2020', '2021', '2022'],
@@ -625,12 +629,25 @@ projects_section = html.Div(id="projects", children=[
                 "This project analyzes differences between disciplines, such as natural sciences and humanities.")),
         ]),
         dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="faculty-differences-graph",
-                figure=px.bar(df_word_usage, x="Year", y="Word_Count", color="Word_Type",
-                              title="Comparison of Word Usage by Faculty")
-            )),
-        ], className="mb-5"),
+
+            html.Div(id='slider-RQ6', children=
+            [dcc.Slider(id='RQ6-year-slider',
+                        min=RQ_6_df['Year'].min(),
+                        max=RQ_6_df['Year'].max(),
+                        value=RQ_6_df['Year'].min(),
+                        marks={str(year): str(year) for year in RQ_6_df['Year'].unique()},
+                        step=None
+                        )], style={'width': '50%', 'display': 'inline-block'}),
+            # inline-block : to show slider and dropdown in the same line
+
+            html.Div(id='dropdown-div', children=
+            [dcc.Dropdown(id='RQ6-Keyword-dropdown',
+                          options=[{'label': i, 'value': i} for i in np.append(['All'], RQ_6_df['Keyword'].unique())],
+                          value='All'
+                          )], style={'width': '50%', 'display': 'inline-block'}),
+
+            dcc.Graph(id='RQ6-scatter')
+        ]),
 
         # Research Question 7.1: Comparison Between Universities and Fachhochschulen (Percentage of Flagged Papers)
         dbc.Row([
