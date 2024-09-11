@@ -26,6 +26,46 @@ from ast import literal_eval
 
 #DATEN AUS CSV
 #Frage 7.1
+
+
+# Funktion zur Berechnung der markierten Artikel pro Institutionstyp und Datumskategorie
+def calculate_flagged_papers(df, institution_types):
+    # Gruppierung nach Institutionstyp und Flag
+    df_grouped = df.groupby(['type', 'flag']).size().reset_index(name='count')
+
+    # Berechnung der Gesamtzahl der Paper pro Institutionstyp
+    df_total = df.groupby('type').size().reset_index(name='total_count')
+
+    # Verknüpfe die Gesamtzahlen mit den gruppierten Daten
+    df_grouped = pd.merge(df_grouped, df_total, on='type')
+
+    # Berechnung des Prozentsatzes
+    df_grouped['percentage'] = (df_grouped['count'] / df_grouped['total_count']) * 100
+
+    # Filtere nur die markierten Artikel
+    df_flagged = df_grouped[df_grouped['flag'] == 'Flagged']
+
+    # Gruppierung nach Institutionstyp und Veröffentlichungsdatum
+    df_date_grouped = df[df['flag'] == 'Flagged'].groupby(['type', 'DateCategory']).size().reset_index(name='count')
+
+    # Berechnung der Gesamtzahl der Paper nach Veröffentlichungsdatum
+    df_total_date = df.groupby(['type', 'DateCategory']).size().reset_index(name='total_count')
+
+    # Verknüpfen der Gesamtzahlen mit den gruppierten Daten
+    df_date_grouped = pd.merge(df_date_grouped, df_total_date, on=['type', 'DateCategory'])
+
+    # Berechnung des Prozentsatzes
+    df_date_grouped['percentage'] = (df_date_grouped['count'] / df_date_grouped['total_count']) * 100
+
+    return df_flagged, df_date_grouped
+
+
+# Anwendung der Funktion für 7.1 (Universitäten und Fachhochschulen)
+df_flagged_7_1, df_date_grouped_7_1 = calculate_flagged_papers(df_combined, ['Universität', 'Fachhochschule'])
+
+# Anwendung der Funktion für 7.2 (EU und Asien)
+df_flagged_7_2, df_date_grouped_7_2 = calculate_flagged_papers(df_combined_eu_asia, ['EU', 'Asien'])
+
 colors_blind_friendly = ['#D55E00', '#0072B2', '#F0E442', '#009E73', '#E69F00', '#56B4E9', '#CC79A7', '#8E44AD', '#F39C12', '#1ABC9C', '#2C3E50', '#C0392B', '#2980B9', '#27AE60']
 df_universities = pd.read_csv('Data/Merged_Germany_datasets.csv')
 df_fachhochschulen = pd.read_csv('Data/Merged_FH_datasets.csv')
@@ -1155,7 +1195,7 @@ projects_section = html.Div(id="projects", children=[
         dbc.Row([
             dbc.Col(dcc.Graph(
                 id="comparison-graph-7-1",
-                figure=px.bar(df_flagged, x='type', y='percentage', color='type',
+                figure=px.bar(df_flagged_7_1, x='type', y='percentage', color='type',
                               color_discrete_sequence=colors_blind_friendly,
                               title="Percentage of Flagged Papers between Universities and Fachhochschulen",
                               labels={'type': 'Institution Type', 'percentage': 'Percentage of Papers'})
@@ -1172,7 +1212,7 @@ projects_section = html.Div(id="projects", children=[
         dbc.Row([
             dbc.Col(dcc.Graph(
                 id="date-comparison-graph-7-1",
-                figure=px.bar(df_date_grouped, x='type', y='percentage', color='DateCategory',
+                figure=px.bar(df_date_grouped_7_1, x='type', y='percentage', color='DateCategory',
                               color_discrete_sequence=colors_blind_friendly,
                               title="Percentage of Flagged Papers Before and After 1.1.2023",
                               barmode='group',
@@ -1190,11 +1230,11 @@ projects_section = html.Div(id="projects", children=[
         dbc.Row([
             dbc.Col(dcc.Graph(
                 id="year-comparison-graph-7-1-with-trend",
-                figure=px.line(df_year_grouped, x='PubDate', y='percentage', color='type',
+                figure=px.line(df_date_grouped_7_1, x='PubDate', y='percentage', color='type',
                                color_discrete_sequence=colors_blind_friendly,
                                title=title_with_p_value_7_1,
                                labels={'PubDate': 'Publication Year', 'percentage': 'Percentage of Papers', 'type': 'Institution Type'})
-                .add_scatter(x=df_year_grouped['PubDate'], y=df_year_grouped['trend_7_1'], mode='lines', name='Trend Line 7.1')
+                .add_scatter(x=df_date_grouped_7_1['PubDate'], y=df_date_grouped_7_1['trend_7_1'], mode='lines', name='Trend Line 7.1')
                 .update_layout(xaxis=dict(tickmode='linear', dtick=1))  # Show full years on the x-axis  # Setzt nur ganze Zahlen als X-Achsen-Werte
             )),
         ], className="mb-5"),
