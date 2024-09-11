@@ -217,8 +217,8 @@ colors_blind_friendly_extended = ['#D55E00', '#0072B2', '#F0E442', '#009E73', '#
                                   '#8E44AD', '#F39C12', '#1ABC9C', '#2C3E50', '#C0392B', '#2980B9', '#27AE60']
 
 # Use the blue and orange tones specifically for the visualizations
-color_blue = colors_blind_friendly_extended[1]  # '#0072B2' (Blue)
-color_orange = colors_blind_friendly_extended[0]  # '#D55E00' (Orange)
+color_blue = colors_blind_friendly[1]  # '#0072B2' (Blue)
+color_orange = colors_blind_friendly[0]  # '#D55E00' (Orange)
 
 
 ######## Code for Research Question 1#####################################################
@@ -289,7 +289,11 @@ def generate_relative_frequency_bar(pre_chatgpt_relative, post_chatgpt_relative,
         x='Word',
         y=['Pre_ChatGPT', 'Post_ChatGPT'],
         title=f'Relative Word Usage Before and After ChatGPT ({region_name})',
-        barmode='group'
+        barmode='group',
+        color_discrete_map = {
+            'Pre_ChatGPT': color_blue,
+            'Post_ChatGPT': color_orange
+        }
     )
 
     # Return the figure for use in Dash layout
@@ -310,59 +314,74 @@ fig_bar_universities = generate_relative_frequency_bar(pre_chatgpt_relative_univ
 fig_bar_fachhochschulen = generate_relative_frequency_bar(pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, "Fachhochschulen")
 
 # Chi-Square Test function
+# Function to perform Chi-Square test for word groups
+
 def perform_chi_square_test(pre_chatgpt_relative, post_chatgpt_relative, all_words):
-    # Create a contingency table
+    # Prepare lists to store observed (post) and expected (pre) relative frequencies
+    observed_values = [post_chatgpt_relative[word] for word in all_words]
+    expected_values = [pre_chatgpt_relative[word] for word in all_words]
+
+    # Create a contingency table with relative frequencies
     contingency_table = pd.DataFrame({
-        'Pre_ChatGPT': [pre_chatgpt_relative[word] for word in all_words],
-        'Post_ChatGPT': [post_chatgpt_relative[word] for word in all_words]
+        'Expected (Pre_ChatGPT)': expected_values,
+        'Observed (Post_ChatGPT)': observed_values
     })
 
-    # Add a small value to avoid zero frequencies
+    # Ensure no zero counts by adding a small value (optional)
     contingency_table += 1e-10
 
-    # Perform the Chi-Square test (returning chi2 and p only)
-    chi2, p, dof, _ = chi2_contingency(contingency_table)
+    # Perform the Chi-Square test (returning chi2 and p-value)
+    chi2, p, dof, expected = chi2_contingency(contingency_table.T)
 
-    return chi2, p, dof
-# Perform the Chi-Square test for EU
-chi2_eu, p_eu, dof_eu = perform_chi_square_test(pre_chatgpt_relative_eu, post_chatgpt_relative_eu, all_words_eu)
+    # Calculate the residuals for the heatmap (Observed - Expected)
+    residuals = np.array(observed_values) - np.array(expected[1])
 
-# Perform the Chi-Square test for Asia
-chi2_asia, p_asia, dof_asia = perform_chi_square_test(pre_chatgpt_relative_asia, post_chatgpt_relative_asia, all_words_asia)
+    return chi2, p, dof, residuals
 
-# Perform the Chi-Square test for Universities
-chi2_universities, p_universities, dof_universities = perform_chi_square_test(pre_chatgpt_relative_universities, post_chatgpt_relative_universities, all_words_universities)
 
-# Perform the Chi-Square test for Fachhochschulen
-chi2_fachhochschulen, p_fachhochschulen, dof_fachhochschulen= perform_chi_square_test(pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, all_words_fachhochschulen)
-# Function to generate the Chi-Square pie chart, always showing a visual regardless of p-value
-def generate_chi_square_pie(p_value, region_name):
-    # If p-value is 1.0, it means "No significant difference"
-    if p_value >= 0.05:
-        significant_label = "No significant difference"
-        significant_value = 1
-    else:
-        significant_label = "Significant difference"
-        significant_value = 1
+def generate_chi_square_heatmap(residuals, words, region_name):
+    # Ensure that words are passed as a list, not a set
+    words = list(words)  # Convert set to list if necessary
 
-    # Create pie chart
-    fig = go.Figure()
+    # Create a 2D array for the heatmap
+    heatmap_data = [residuals]
 
-    # Add pie chart trace
-    fig.add_trace(go.Pie(
-        labels=[significant_label, "Significant difference" if significant_label == "No significant difference" else "No significant difference"],
-        values=[significant_value, 0],  # Adjust the second value to ensure the visualization is balanced
-        hole=0.4  # Donut chart
+    # Create heatmap
+    fig = go.Figure(data=go.Heatmap(
+        z=heatmap_data,  # Heatmap data
+        x=words,  # X-axis: words/categories
+        y=[region_name],  # Y-axis (only one row for the region name)
+        colorscale='Blues',  # Color scale (you can change this as needed)
+        colorbar=dict(title="Residuals")  # Colorbar with title
     ))
 
-    # Update layout for the chart
+    # Update layout for better visualization
     fig.update_layout(
-        title_text=f"Chi-Square Test Result for {region_name} (p-value: {p_value:.6f})",
-        annotations=[dict(text=significant_label, x=0.5, y=0.5, font_size=20, showarrow=False)]
+        title_text=f"Residual Heatmap for {region_name}",
+        xaxis_title="Words",
+        yaxis_title="",
+        xaxis_tickangle=-45  # Rotate word labels if they are long
     )
 
     return fig
-# Shapiro-Wilk Test for multiple regions
+
+# Perform the Chi-Square test for different regions and generate heatmaps
+
+# Universities
+chi2_universities, p_universities, dof_universities, residuals_universities = perform_chi_square_test(pre_chatgpt_relative_universities, post_chatgpt_relative_universities, all_words_universities)
+fig_heatmap_universities = generate_chi_square_heatmap(residuals_universities, all_words_universities, "Universities")
+
+# EU
+chi2_eu, p_eu, dof_eu, residuals_eu = perform_chi_square_test(pre_chatgpt_relative_eu, post_chatgpt_relative_eu, all_words_eu)
+fig_heatmap_eu = generate_chi_square_heatmap(residuals_eu, all_words_eu, "EU")
+
+# Asia
+chi2_asia, p_asia, dof_asia, residuals_asia = perform_chi_square_test(pre_chatgpt_relative_asia, post_chatgpt_relative_asia, all_words_asia)
+fig_heatmap_asia = generate_chi_square_heatmap(residuals_asia, all_words_asia, "Asia")
+
+# Fachhochschulen
+chi2_fachhochschulen, p_fachhochschulen, dof_fachhochschulen, residuals_fachhochschulen = perform_chi_square_test(pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, all_words_fachhochschulen)
+fig_heatmap_fachhochschulen = generate_chi_square_heatmap(residuals_fachhochschulen, all_words_fachhochschulen, "Fachhochschulen")
 
 # Function to perform the Shapiro-Wilk test for normality
 def perform_shapiro_test(pre_chatgpt_relative, post_chatgpt_relative):
@@ -416,12 +435,6 @@ def generate_shapiro_histogram_figure(pre_values, post_values, region_name):
 
     # Return the figure
     return fig
-# Generate Chi-Square pie charts for all regions
-fig_pie_eu = generate_chi_square_pie(p_eu, "EU")
-fig_pie_asia = generate_chi_square_pie(p_asia, "Asia")
-fig_pie_universities = generate_chi_square_pie(p_universities, "Universities")
-fig_pie_fachhochschulen = generate_chi_square_pie(p_fachhochschulen, "Fachhochschulen")
-
 # Generate the Shapiro-Wilk histogram figures for all regions
 
 # EU region
@@ -475,8 +488,11 @@ def generate_violin_plot(pre_values, post_values, region_name):
         'Group': ['Pre-ChatGPT'] * len(pre_values) + ['Post-ChatGPT'] * len(post_values)
     })
 
-    # Create the violin plot
-    fig = px.violin(data, x='Group', y='Values', box=True, points='all', title=f"Mann-Whitney U Test for {region_name}")
+    # Create the violin plot with custom colors
+    fig = px.violin(data, x='Group', y='Values', box=True, points='all', title=f"Mann-Whitney U Test for {region_name}",
+                    color='Group', color_discrete_map={'Pre-ChatGPT': color_blue, 'Post-ChatGPT': color_orange})
+
+    # Customize layout
 
     return fig
 
@@ -870,12 +886,14 @@ projects_section = html.Div(id="projects", children=[
         dbc.Row([dbc.Col(html.H2("Universities Section"), className="mb-4 text-center")]),
         # Bar Chart for Universities
         dbc.Row([dbc.Col(dcc.Graph(id="word-usage-bar-universities", figure=fig_bar_universities))], className="mb-5"),
-        # Chi-Square Test for Universities
-        dbc.Row([dbc.Col(dcc.Graph(id="chi-square-pie-universities", figure=fig_pie_universities))], className="mb-5"),
+        # Chi-Square Heatmap for Universities
+        dbc.Row([dbc.Col(dcc.Graph(id="chi-square-heatmap-universities", figure=fig_heatmap_universities))],
+                className="mb-5"),
         dbc.Row([dbc.Col(html.P(
             f"Chi-Square Test for Universities: chi2 = {chi2_universities:.6f}, p-value = {p_universities:.6f}. "
             f"{'Significant difference' if p_universities < 0.05 else 'No significant difference'}."
         ))], className="mb-5"),
+
         # Shapiro-Wilk Test for Universities
         dbc.Row([dbc.Col(dcc.Graph(id="shapiro-histogram-universities", figure=fig_shapiro_universities))],
                 className="mb-5"),
@@ -902,7 +920,7 @@ projects_section = html.Div(id="projects", children=[
         # Bar Chart for EU
         dbc.Row([dbc.Col(dcc.Graph(id="word-usage-bar-eu", figure=fig_bar_eu))], className="mb-5"),
         # Chi-Square Test for EU
-        dbc.Row([dbc.Col(dcc.Graph(id="chi-square-pie-eu", figure=fig_pie_eu))], className="mb-5"),
+        dbc.Row([dbc.Col(dcc.Graph(id="chi-square-heatmap-eu", figure=fig_heatmap_eu))], className="mb-5"),
         dbc.Row([dbc.Col(html.P(
             f"Chi-Square Test for EU: chi2 = {chi2_eu:.6f}, p-value = {p_eu:.6f}. "
             f"{'Significant difference' if p_eu < 0.05 else 'No significant difference'}."
@@ -930,8 +948,8 @@ projects_section = html.Div(id="projects", children=[
         dbc.Row([dbc.Col(html.H2("Asia Section"), className="mb-4 text-center")]),
         # Bar Chart for Asia
         dbc.Row([dbc.Col(dcc.Graph(id="word-usage-bar-asia", figure=fig_bar_asia))], className="mb-5"),
-        # Chi-Square Test for Asia
-        dbc.Row([dbc.Col(dcc.Graph(id="chi-square-pie-asia", figure=fig_pie_asia))], className="mb-5"),
+        # Chi-Square Heatmap for Asia
+        dbc.Row([dbc.Col(dcc.Graph(id="chi-square-heatmap-asia", figure=fig_heatmap_asia))], className="mb-5"),
         dbc.Row([dbc.Col(html.P(
             f"Chi-Square Test for Asia: chi2 = {chi2_asia:.6f}, p-value = {p_asia:.6f}. "
             f"{'Significant difference' if p_asia < 0.05 else 'No significant difference'}."
@@ -960,8 +978,8 @@ projects_section = html.Div(id="projects", children=[
         # Bar Chart for Fachhochschulen
         dbc.Row([dbc.Col(dcc.Graph(id="word-usage-bar-fachhochschulen", figure=fig_bar_fachhochschulen))],
                 className="mb-5"),
-        # Chi-Square Test for Fachhochschulen
-        dbc.Row([dbc.Col(dcc.Graph(id="chi-square-pie-fachhochschulen", figure=fig_pie_fachhochschulen))],
+        # Chi-Square Heatmap for Fachhochschulen
+        dbc.Row([dbc.Col(dcc.Graph(id="chi-square-heatmap-fachhochschulen", figure=fig_heatmap_fachhochschulen))],
                 className="mb-5"),
         dbc.Row([dbc.Col(html.P(
             f"Chi-Square Test for Fachhochschulen: chi2 = {chi2_fachhochschulen:.6f}, p-value = {p_fachhochschulen:.6f}. "
