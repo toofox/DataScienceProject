@@ -194,7 +194,7 @@ title_with_p_value = f"Percentage of Flagged Papers for 2017-2024 (CAU vs Other 
 
 # Research question 4
 df_RQ4_comparison = pd.read_csv('Data/RQ4_comparison.csv')
-
+RQ_4_df = pd.read_csv('Data/RQ4_PDF_Abstract.csv')
 
 ##### RQ6 Import
 RQ_6_df = pd.read_csv('Data/RQ6_faculty_keyword.csv')
@@ -1069,14 +1069,33 @@ projects_section = html.Div(id="projects", children=[
                 "Is there a correlation between flagged keywords in abstracts and pdf files?")),
         ]),
         dbc.Row([
-            dbc.Col(dcc.Graph(id="RQ4_comparison", figure=(
-            go.Figure(data=[
-                            go.Bar(name='Abstract Keywords', x=df_RQ4_comparison['index'], y=df_RQ4_comparison['rel_Abstracts']),
-                            go.Bar(name='PDF Keywords', x=df_RQ4_comparison['index'], y=df_RQ4_comparison['rel_PDF'])
-                            ])
-                            .update_layout(barmode='group')
-                )
-            )),
+            html.Div(id='slider-RQ4', children=
+            [dcc.Slider(id='RQ4-year-slider',
+                        min=RQ_4_df['Year'].min(),
+                        max=RQ_4_df['Year'].max(),
+                        value=RQ_4_df['Year'].min(),
+                        marks={str(year): str(year) for year in RQ_4_df['Year'].unique()},
+                        step=None
+                        )], style={'width': '50%', 'display': 'inline-block'}),
+            # inline-block : to show slider and dropdown in the same line
+
+            html.Div(id='RQ4-radio', children=
+            [dcc.RadioItems(id='RQ4-Keyword-radio',
+                            options=[
+                                {'label': 'PDF', 'value': 'Count_PDF'},
+                                {'label': 'Abstract', 'value': 'Count_Abs'}],
+                            value='Count_PDF',
+                            )], style={'width': '50%', 'display': 'inline-block'}),
+
+            html.Div(id='RQ4-radio-log', children=
+            [dcc.RadioItems(id='RQ4-Keyword-radio-log',
+                            options=[
+                                {'label': 'Log scale', 'value': True},
+                                {'label': 'Linear scale', 'value': False}],
+                            value=True,
+                            )], style={'width': '50%', 'display': 'inline-block'}),
+
+            dcc.Graph(id='RQ4-barchart'),
         ], className="mb-5"),
 
         # Research Question 5: Comparison Between CAU and Other Universities

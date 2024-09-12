@@ -11,6 +11,7 @@ server = app.server
 
 ###### IMPORT SECTION ######
 
+RQ_4_df = pd.read_csv('Data/RQ4_PDF_Abstract.csv')
 RQ_6_df = pd.read_csv('Data/RQ6_faculty_keyword.csv')
 
 ############################
@@ -36,6 +37,44 @@ app.layout = html.Div([
 ])
 
 ###### CALLBACK SECTION ######
+
+# RQ4 callback function
+
+@app.callback(Output(component_id='RQ4-barchart', component_property='figure'),
+              [Input(component_id='RQ4-year-slider', component_property='value'),
+               Input(component_id='RQ4-Keyword-radio', component_property='value'),
+               Input(component_id='RQ4-Keyword-radio-log', component_property='value'),])
+def graph_rq4_update(slider_value, radio_value, xaxis_type):
+
+    filtered_df = RQ_4_df[RQ_4_df['Year'] == slider_value]
+
+    if radio_value == 'Count_PDF':
+        x_value = filtered_df['Count_PDF']
+    elif radio_value == 'Count_Abs':
+        x_value = filtered_df['Count_Abs']
+    else:
+        x_value = filtered_df['Count_PDF']
+
+    fig = px.bar(filtered_df,
+                 x=x_value,
+                 y=filtered_df['Keyword'],
+                 color="Keyword", hover_name="Keyword",
+                 orientation='h',
+                 log_x=xaxis_type,)
+
+    fig.update_layout(
+        height=800,
+        width=800,
+        xaxis_title=radio_value,
+        yaxis=dict(showgrid=True, showline=True, ticks='outside', tickson='boundaries', automargin=True),
+        xaxis=dict(showgrid=True, showline=True, ticks='outside', tickson='boundaries', automargin=True)
+    )
+
+    fig.update_layout(barmode='stack', yaxis={'categoryorder': 'total ascending'})
+
+    fig.update_xaxes(rangemode="tozero")
+
+    return fig
 
 # RQ6 Callback
 @app.callback(Output(component_id='RQ6-scatter', component_property='figure'),
@@ -82,6 +121,6 @@ def graph_update(slider_value, keyword_value):
 
 
 if __name__ == '__main__':
-    #app.run(debug=True)
-    app.run_server(debug=True)
+    app.run(debug=True)
+    #app.run_server(debug=True)
     #app.run(debug=True)
