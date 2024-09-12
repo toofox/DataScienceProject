@@ -13,41 +13,120 @@ import matplotlib.pyplot as plt
 from scipy.stats import mannwhitneyu
 from ast import literal_eval
 
-#chatgpt:
+# chatgpt:
 # Um  eigene CSV-Datei einzufügen, ersetzen Sie 'your_file.csv' durch den Pfad zu Ihrer CSV-Datei.
 # Stellen Sie sicher, dass Ihre CSV-Datei im selben Verzeichnis wie dieses Skript liegt oder geben Sie den vollständigen Pfad an.
 # df_bsp = pd.read_csv('your_file.csv')
 # df_bsp.head({Anzahl der Zeilen, die angezeigt werden sollen})
 
 
+colors_blind_friendly = ['#D55E00', '#0072B2', '#F0E442', '#009E73', '#E69F00', '#56B4E9', '#CC79A7', '#8E44AD',
+                         '#F39C12', '#1ABC9C', '#2C3E50', '#C0392B', '#2980B9', '#27AE60']
 
-
-colors_blind_friendly = ['#D55E00', '#0072B2', '#F0E442', '#009E73', '#E69F00', '#56B4E9', '#CC79A7', '#8E44AD', '#F39C12', '#1ABC9C', '#2C3E50', '#C0392B', '#2980B9', '#27AE60']
-
-
-#DATEN AUS CSV
-#test
+# DATEN AUS CSV
+# test
 import pandas as pd
 import plotly.express as px
 from scipy import stats
 
-
 # Assuming you have loaded the dataframes df_universities, df_fachhochschulen and merged them as df_combined
-df_universities = pd.read_csv('Data/Frage7/German_Uni_arxiv_flag_cleaned_no_NaN.csv')
-df_fachhochschulen = pd.read_csv('Data/Frage7/Merged_FH_datasets_cleaned_no_NaN.csv')
-df_universities['type'] = 'Universität'
-df_fachhochschulen['type'] = 'Fachhochschule'
-df_combined_Uni_FH = pd.concat([df_universities, df_fachhochschulen])
-df_eu = pd.read_csv('Data/Frage7/Merged_EU_datasets_cleaned_cleaned_no_NaN.csv')
-df_asia = pd.read_csv('Data/Frage7/Merged_Asia_datasets_cleaned_cleaned_no_NaN.csv')
+import pandas as pd
+
+# Load all datasets
+df_german_uni = pd.read_csv('Data/Frage_7/German_Uni.csv')
+df_german_fh = pd.read_csv('Data/Frage_7/German_FH.csv')
+df_germany = pd.read_csv('Data/Frage_7/Germany.csv')
+df_eu = pd.read_csv('Data/Frage_7/EU.csv')
+df_asia = pd.read_csv('Data/Frage_7/Asia.csv')
+df_world = pd.read_csv('Data/Frage_7/World.csv')
+
+# Adding 'type' column to differentiate the sources of data
+df_german_uni['type'] = 'Universität DE'
+df_german_fh['type'] = 'Fachhochschule DE'
+df_germany['type'] = 'Germany'
 df_eu['type'] = 'EU'
 df_asia['type'] = 'Asien'
-df_combined_eu_asia = pd.concat([df_eu, df_asia])
-df_germany = pd.read_csv('Data/Frage7/Merged_Germany_datasets_cleaned_no_NaN.csv')
-df_germany['type'] = 'Germany'
-df_combined_germany_asia = pd.concat([df_germany, df_eu, df_asia])
-df_combined_germany_eu = pd.concat([df_germany, df_eu])
+df_world['type'] = 'World'
 
+# Combine datasets (two-way combinations)
+
+# 1. Combine German University and Fachhochschule
+df_combined_Uni_FH = pd.concat([df_german_uni, df_german_fh])
+
+# 2. Combine German University and Germany
+df_combined_Uni_Germany = pd.concat([df_german_uni, df_germany])
+
+# 3. Combine German University and EU
+df_combined_Uni_EU = pd.concat([df_german_uni, df_eu])
+
+# 4. Combine German University and Asia
+df_combined_Uni_Asia = pd.concat([df_german_uni, df_asia])
+
+# 5. Combine German University and World
+df_combined_Uni_World = pd.concat([df_german_uni, df_world])
+
+# 6. Combine Fachhochschule and Germany
+df_combined_FH_Germany = pd.concat([df_german_fh, df_germany])
+
+# 7. Combine Fachhochschule and EU
+df_combined_FH_EU = pd.concat([df_german_fh, df_eu])
+
+# 8. Combine Fachhochschule and Asia
+df_combined_FH_Asia = pd.concat([df_german_fh, df_asia])
+
+# 9. Combine Fachhochschule and World
+df_combined_FH_World = pd.concat([df_german_fh, df_world])
+
+# 10. Combine Germany and EU
+df_combined_Germany_EU = pd.concat([df_germany, df_eu])
+
+# 11. Combine Germany and Asia
+df_combined_Germany_Asia = pd.concat([df_germany, df_asia])
+
+# 12. Combine Germany and World
+df_combined_Germany_World = pd.concat([df_germany, df_world])
+
+# 13. Combine EU and Asia
+df_combined_EU_Asia = pd.concat([df_eu, df_asia])
+
+# 14. Combine EU and World
+df_combined_EU_World = pd.concat([df_eu, df_world])
+
+# 15. Combine Asia and World
+df_combined_Asia_World = pd.concat([df_asia, df_world])
+
+datasets = {
+    'German University': df_german_uni,
+    'Fachhochschule': df_german_fh,
+    'Germany': df_germany,
+    'EU': df_eu,
+    'Asia': df_asia,
+    'World': df_world
+}
+# Now you have all two-way combinations of datasets in the following variables:
+# - df_combined_Uni_FH
+# - df_combined_Uni_Germany
+# - df_combined_Uni_EU
+# - df_combined_Uni_Asia
+# - df_combined_Uni_World
+# - df_combined_FH_Germany
+# - df_combined_FH_EU
+# - df_combined_FH_Asia
+# - df_combined_FH_World
+# - df_combined_Germany_EU
+# - df_combined_Germany_Asia
+# - df_combined_Germany_World
+# - df_combined_EU_Asia
+# - df_combined_EU_World
+# - df_combined_Asia_World
+
+df_universities = pd.read_csv('Data/Frage_7/German_Uni.csv')
+df_fachhochschulen = pd.read_csv('Data/Frage_7/German_FH.csv')
+df_universities['type'] = 'Universität'
+df_fachhochschulen['type'] = 'Fachhochschule'
+
+df_eu['type'] = 'EU'
+df_asia['type'] = 'Asien'
 
 
 def prepare_data(df, date_cutoff=2023):
@@ -129,15 +208,14 @@ def task_workflow(df, years_range, task_title):
 
 
 # Assuming df_combined is the merged dataframe of universities and Fachhochschulen
-fig_bar_7_1, fig_line_7_1 = task_workflow(df_combined_Uni_FH, [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024], "Universities vs Fachhochschulen")
-fig_bar_7_2, fig_line_7_2 = task_workflow(df_combined_eu_asia, [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024], "EU vs Asia")
+fig_bar_7_1, fig_line_7_1 = task_workflow(df_combined_Uni_FH, [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
+                                          "Universities vs Fachhochschulen")
+fig_bar_7_2, fig_line_7_2 = task_workflow(df_combined_Asia_World, [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
+                                          "EU vs Asia")
 
-
-
-
-#Frage 5
+# Frage 5
 df_kiel_uni_5 = pd.read_csv('Data/Kiel_Uni_arxiv_flag_updated.csv')
-df_merged_germany_5 = pd.read_csv('Data/Merged_Germany_datasets.csv')
+df_merged_germany_5 = pd.read_csv('Data/Frage_7/Germany.csv')
 # Add 'type' column to differentiate CAU and other universities
 df_kiel_uni_5['type'] = 'CAU'
 df_merged_germany_5['type'] = 'Other Universities'
@@ -149,7 +227,8 @@ df_combined_5 = pd.concat([df_kiel_uni_5, df_merged_germany_5])
 df_combined_5['flag'] = df_combined_5['flag'].apply(lambda x: 'Flagged' if x == 'Yes' else 'Not Flagged')
 
 # Create date category for before and after 1.1.2023
-df_combined_5['DateCategory'] = df_combined_5['PubDate'].apply(lambda x: 'Before 1.1.2023' if x < 2023 else 'After 1.1.2023')
+df_combined_5['DateCategory'] = df_combined_5['PubDate'].apply(
+    lambda x: 'Before 1.1.2023' if x < 2023 else 'After 1.1.2023')
 
 # 1. Bar chart for flagged papers percentage
 df_grouped_5 = df_combined_5.groupby(['type', 'flag']).size().reset_index(name='count')
@@ -158,14 +237,16 @@ df_grouped_5 = pd.merge(df_grouped_5, df_total_5, on='type')
 df_grouped_5['percentage'] = (df_grouped_5['count'] / df_grouped_5['total_count']) * 100
 
 # 2. Bar chart for comparison before and after 1.1.2023
-df_date_grouped_5 = df_combined_5[df_combined_5['flag'] == 'Flagged'].groupby(['type', 'DateCategory']).size().reset_index(name='count')
+df_date_grouped_5 = df_combined_5[df_combined_5['flag'] == 'Flagged'].groupby(
+    ['type', 'DateCategory']).size().reset_index(name='count')
 df_total_date_5 = df_combined_5.groupby(['type', 'DateCategory']).size().reset_index(name='total_count')
 df_date_grouped_5 = pd.merge(df_date_grouped_5, df_total_date_5, on=['type', 'DateCategory'])
 df_date_grouped_5['percentage'] = (df_date_grouped_5['count'] / df_date_grouped_5['total_count']) * 100
 
 # 3. Line chart for flagged papers for 2020-2024
-df_filtered_years_5 = df_combined_5[df_combined_5['PubDate'].isin([2017,2018,2019,2020, 2021, 2022, 2023, 2024])]
-df_year_grouped_5 = df_filtered_years_5[df_filtered_years_5['flag'] == 'Flagged'].groupby(['type', 'PubDate']).size().reset_index(name='count')
+df_filtered_years_5 = df_combined_5[df_combined_5['PubDate'].isin([2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024])]
+df_year_grouped_5 = df_filtered_years_5[df_filtered_years_5['flag'] == 'Flagged'].groupby(
+    ['type', 'PubDate']).size().reset_index(name='count')
 df_total_years_5 = df_filtered_years_5.groupby(['type', 'PubDate']).size().reset_index(name='total_count')
 df_year_grouped_5 = pd.merge(df_year_grouped_5, df_total_years_5, on=['type', 'PubDate'])
 df_year_grouped_5['percentage'] = (df_year_grouped_5['count'] / df_year_grouped_5['total_count']) * 100
@@ -213,6 +294,7 @@ def extract_words(text):
     found = re.findall(pattern, text)
     return Counter({word: int(count) for word, count in found})
 
+
 # Function to calculate relative word frequencies
 def calculate_relative_frequencies(df_pre, df_post):
     pre_chatgpt_words = Counter()
@@ -240,6 +322,7 @@ def calculate_relative_frequencies(df_pre, df_post):
 
     return pre_chatgpt_relative, post_chatgpt_relative, all_words
 
+
 # Calculate for all regions
 df_eu_pre = df_eu[df_eu['PubDate'] <= 2022]
 df_eu_post = df_eu[df_eu['PubDate'] >= 2023]
@@ -247,15 +330,19 @@ pre_chatgpt_relative_eu, post_chatgpt_relative_eu, all_words_eu = calculate_rela
 
 df_asia_pre = df_asia[df_asia['PubDate'] <= 2022]
 df_asia_post = df_asia[df_asia['PubDate'] >= 2023]
-pre_chatgpt_relative_asia, post_chatgpt_relative_asia, all_words_asia = calculate_relative_frequencies(df_asia_pre, df_asia_post)
+pre_chatgpt_relative_asia, post_chatgpt_relative_asia, all_words_asia = calculate_relative_frequencies(df_asia_pre,
+                                                                                                       df_asia_post)
 
 df_universities_pre = df_universities[df_universities['PubDate'] <= 2022]
 df_universities_post = df_universities[df_universities['PubDate'] >= 2023]
-pre_chatgpt_relative_universities, post_chatgpt_relative_universities, all_words_universities = calculate_relative_frequencies(df_universities_pre, df_universities_post)
+pre_chatgpt_relative_universities, post_chatgpt_relative_universities, all_words_universities = calculate_relative_frequencies(
+    df_universities_pre, df_universities_post)
 
 df_fachhochschulen_pre = df_fachhochschulen[df_fachhochschulen['PubDate'] <= 2022]
 df_fachhochschulen_post = df_fachhochschulen[df_fachhochschulen['PubDate'] >= 2023]
-pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, all_words_fachhochschulen = calculate_relative_frequencies(df_fachhochschulen_pre, df_fachhochschulen_post)
+pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, all_words_fachhochschulen = calculate_relative_frequencies(
+    df_fachhochschulen_pre, df_fachhochschulen_post)
+
 
 # Function to generate bar chart for relative word usage
 def generate_relative_frequency_bar(pre_chatgpt_relative, post_chatgpt_relative, region_name):
@@ -278,6 +365,7 @@ def generate_relative_frequency_bar(pre_chatgpt_relative, post_chatgpt_relative,
     # Return the figure for use in Dash layout
     return fig
 
+
 # Generate relative frequency bar charts for all regions
 
 # For EU region
@@ -287,10 +375,13 @@ fig_bar_eu = generate_relative_frequency_bar(pre_chatgpt_relative_eu, post_chatg
 fig_bar_asia = generate_relative_frequency_bar(pre_chatgpt_relative_asia, post_chatgpt_relative_asia, "Asia")
 
 # For Universities
-fig_bar_universities = generate_relative_frequency_bar(pre_chatgpt_relative_universities, post_chatgpt_relative_universities, "Universities")
+fig_bar_universities = generate_relative_frequency_bar(pre_chatgpt_relative_universities,
+                                                       post_chatgpt_relative_universities, "Universities")
 
 # For Fachhochschulen
-fig_bar_fachhochschulen = generate_relative_frequency_bar(pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, "Fachhochschulen")
+fig_bar_fachhochschulen = generate_relative_frequency_bar(pre_chatgpt_relative_fachhochschulen,
+                                                          post_chatgpt_relative_fachhochschulen, "Fachhochschulen")
+
 
 # Chi-Square Test function
 def perform_chi_square_test(pre_chatgpt_relative, post_chatgpt_relative, all_words):
@@ -307,17 +398,25 @@ def perform_chi_square_test(pre_chatgpt_relative, post_chatgpt_relative, all_wor
     chi2, p, dof, _ = chi2_contingency(contingency_table)
 
     return chi2, p, dof
+
+
 # Perform the Chi-Square test for EU
 chi2_eu, p_eu, dof_eu = perform_chi_square_test(pre_chatgpt_relative_eu, post_chatgpt_relative_eu, all_words_eu)
 
 # Perform the Chi-Square test for Asia
-chi2_asia, p_asia, dof_asia = perform_chi_square_test(pre_chatgpt_relative_asia, post_chatgpt_relative_asia, all_words_asia)
+chi2_asia, p_asia, dof_asia = perform_chi_square_test(pre_chatgpt_relative_asia, post_chatgpt_relative_asia,
+                                                      all_words_asia)
 
 # Perform the Chi-Square test for Universities
-chi2_universities, p_universities, dof_universities = perform_chi_square_test(pre_chatgpt_relative_universities, post_chatgpt_relative_universities, all_words_universities)
+chi2_universities, p_universities, dof_universities = perform_chi_square_test(pre_chatgpt_relative_universities,
+                                                                              post_chatgpt_relative_universities,
+                                                                              all_words_universities)
 
 # Perform the Chi-Square test for Fachhochschulen
-chi2_fachhochschulen, p_fachhochschulen, dof_fachhochschulen= perform_chi_square_test(pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, all_words_fachhochschulen)
+chi2_fachhochschulen, p_fachhochschulen, dof_fachhochschulen = perform_chi_square_test(
+    pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, all_words_fachhochschulen)
+
+
 # Function to generate the Chi-Square pie chart, always showing a visual regardless of p-value
 def generate_chi_square_pie(p_value, region_name):
     # If p-value is 1.0, it means "No significant difference"
@@ -333,7 +432,8 @@ def generate_chi_square_pie(p_value, region_name):
 
     # Add pie chart trace
     fig.add_trace(go.Pie(
-        labels=[significant_label, "Significant difference" if significant_label == "No significant difference" else "No significant difference"],
+        labels=[significant_label,
+                "Significant difference" if significant_label == "No significant difference" else "No significant difference"],
         values=[significant_value, 0],  # Adjust the second value to ensure the visualization is balanced
         hole=0.4  # Donut chart
     ))
@@ -345,6 +445,8 @@ def generate_chi_square_pie(p_value, region_name):
     )
 
     return fig
+
+
 # Shapiro-Wilk Test for multiple regions
 
 # Function to perform the Shapiro-Wilk test for normality
@@ -367,11 +469,15 @@ def perform_shapiro_test(pre_chatgpt_relative, post_chatgpt_relative):
 
     return shapiro_pre_result, shapiro_post_result
 
+
 # Perform the Shapiro-Wilk test for all regions
 shapiro_pre_eu, shapiro_post_eu = perform_shapiro_test(pre_chatgpt_relative_eu, post_chatgpt_relative_eu)
 shapiro_pre_asia, shapiro_post_asia = perform_shapiro_test(pre_chatgpt_relative_asia, post_chatgpt_relative_asia)
-shapiro_pre_universities, shapiro_post_universities = perform_shapiro_test(pre_chatgpt_relative_universities, post_chatgpt_relative_universities)
-shapiro_pre_fachhochschulen, shapiro_post_fachhochschulen = perform_shapiro_test(pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen)
+shapiro_pre_universities, shapiro_post_universities = perform_shapiro_test(pre_chatgpt_relative_universities,
+                                                                           post_chatgpt_relative_universities)
+shapiro_pre_fachhochschulen, shapiro_post_fachhochschulen = perform_shapiro_test(pre_chatgpt_relative_fachhochschulen,
+                                                                                 post_chatgpt_relative_fachhochschulen)
+
 
 # Function to plot Shapiro-Wilk Test histograms for normality visualization
 # Function to generate Plotly histogram for Shapiro-Wilk test
@@ -399,6 +505,8 @@ def generate_shapiro_histogram_figure(pre_values, post_values, region_name):
 
     # Return the figure
     return fig
+
+
 # Generate Chi-Square pie charts for all regions
 fig_pie_eu = generate_chi_square_pie(p_eu, "EU")
 fig_pie_asia = generate_chi_square_pie(p_asia, "Asia")
@@ -435,9 +543,11 @@ fig_shapiro_fachhochschulen = generate_shapiro_histogram_figure(
     "Fachhochschulen"
 )
 
+
 def clean_numeric_values(values):
     # Filter out any non-numeric values or NaNs
     return [v for v in values if isinstance(v, (int, float)) and not np.isnan(v)]
+
 
 # Mann-Whitney U-Test function
 def perform_mann_whitney_test(pre_values, post_values):
@@ -463,23 +573,33 @@ def generate_violin_plot(pre_values, post_values, region_name):
 
     return fig
 
+
 # Perform the Mann-Whitney U test for all regions
 
 # For EU
-u_stat_eu, p_value_eu = perform_mann_whitney_test(list(pre_chatgpt_relative_eu.values()), list(post_chatgpt_relative_eu.values()))
-fig_violin_eu = generate_violin_plot(list(pre_chatgpt_relative_eu.values()), list(post_chatgpt_relative_eu.values()), "EU")
+u_stat_eu, p_value_eu = perform_mann_whitney_test(list(pre_chatgpt_relative_eu.values()),
+                                                  list(post_chatgpt_relative_eu.values()))
+fig_violin_eu = generate_violin_plot(list(pre_chatgpt_relative_eu.values()), list(post_chatgpt_relative_eu.values()),
+                                     "EU")
 
 # For Asia
-u_stat_asia, p_value_asia = perform_mann_whitney_test(list(pre_chatgpt_relative_asia.values()), list(post_chatgpt_relative_asia.values()))
-fig_violin_asia = generate_violin_plot(list(pre_chatgpt_relative_asia.values()), list(post_chatgpt_relative_asia.values()), "Asia")
+u_stat_asia, p_value_asia = perform_mann_whitney_test(list(pre_chatgpt_relative_asia.values()),
+                                                      list(post_chatgpt_relative_asia.values()))
+fig_violin_asia = generate_violin_plot(list(pre_chatgpt_relative_asia.values()),
+                                       list(post_chatgpt_relative_asia.values()), "Asia")
 
 # For Universities
-u_stat_universities, p_value_universities = perform_mann_whitney_test(list(pre_chatgpt_relative_universities.values()), list(post_chatgpt_relative_universities.values()))
-fig_violin_universities = generate_violin_plot(list(pre_chatgpt_relative_universities.values()), list(post_chatgpt_relative_universities.values()), "Universities")
+u_stat_universities, p_value_universities = perform_mann_whitney_test(list(pre_chatgpt_relative_universities.values()),
+                                                                      list(post_chatgpt_relative_universities.values()))
+fig_violin_universities = generate_violin_plot(list(pre_chatgpt_relative_universities.values()),
+                                               list(post_chatgpt_relative_universities.values()), "Universities")
 
 # For Fachhochschulen
-u_stat_fachhochschulen, p_value_fachhochschulen = perform_mann_whitney_test(list(pre_chatgpt_relative_fachhochschulen.values()), list(post_chatgpt_relative_fachhochschulen.values()))
-fig_violin_fachhochschulen = generate_violin_plot(list(pre_chatgpt_relative_fachhochschulen.values()), list(post_chatgpt_relative_fachhochschulen.values()), "Fachhochschulen")
+u_stat_fachhochschulen, p_value_fachhochschulen = perform_mann_whitney_test(
+    list(pre_chatgpt_relative_fachhochschulen.values()), list(post_chatgpt_relative_fachhochschulen.values()))
+fig_violin_fachhochschulen = generate_violin_plot(list(pre_chatgpt_relative_fachhochschulen.values()),
+                                                  list(post_chatgpt_relative_fachhochschulen.values()),
+                                                  "Fachhochschulen")
 
 ############################################ End research question 1 ##################################################
 
@@ -491,6 +611,7 @@ df_eu_question = pd.read_csv('Data/Merged_EU_datasets_questionwords.csv')
 df_asia_question = pd.read_csv('Data/Merged_Asia_datasets_questionwords.csv')
 df_fachhochschule_question = pd.read_csv('Data/Merged_FH_datasets_questionwords.csv')
 df_world_question = pd.read_csv('Data/Merged_World_datasets_questionwords.csv')
+
 
 # Function to extract question words and their counts from the 'Question_Words' column
 def extract_question_words(question_words_column):
@@ -504,6 +625,7 @@ def extract_question_words(question_words_column):
             question_words_count.append({})
     return question_words_count
 
+
 # Function to aggregate question words across the dataframe
 def aggregate_question_words(df):
     total_words = Counter()
@@ -511,13 +633,17 @@ def aggregate_question_words(df):
         total_words.update(row['Question_Words_Count'])
     return total_words
 
+
 # Function to calculate relative frequencies of question words
 def calculate_relative_frequencies(word_counts, num_abstracts):
     return {word: count / num_abstracts for word, count in word_counts.items()}
 
+
 # Function to calculate relative frequencies of question marks
 def calculate_relative_marks(df, num_abstracts):
     return df['Question_Mark_Count'].sum() / num_abstracts
+
+
 # Process each region separately
 
 # Function to generate bar chart for question words with the specified colors
@@ -537,6 +663,7 @@ def generate_question_word_bar_chart(before_values, after_values, words):
 
     return fig
 
+
 # Bar chart for question marks with Pre-ChatGPT and Post-ChatGPT labels, using specified colors
 def generate_question_mark_chart(relative_marks_before, relative_marks_after):
     fig = go.Figure()
@@ -551,6 +678,8 @@ def generate_question_mark_chart(relative_marks_before, relative_marks_after):
     )
 
     return fig
+
+
 # Process each region separately using the correct DataFrame
 def process_region_data(df, region_name):
     # Check if 'Question_Words' column exists
@@ -620,6 +749,7 @@ def split_data(df):
     pre_chatgpt = df[df['Year'] <= 2022]
     post_chatgpt = df[df['Year'] >= 2023]
     return pre_chatgpt, post_chatgpt
+
 
 # Function to calculate average values
 def calculate_averages(df):
@@ -701,6 +831,7 @@ fig_asia = process_and_visualize_region(df_asia_sentence, "Asia")
 fig_fachhochschule = process_and_visualize_region(df_fachhochschule_sentence, "Fachhochschule")
 fig_world = process_and_visualize_region(df_world_sentence, "World")
 
+
 ############
 
 def safe_mean(x):
@@ -714,6 +845,7 @@ def safe_mean(x):
     except (ValueError, SyntaxError):
         return np.nan
 
+
 def safe_sum(x):
     try:
         lengths = literal_eval(x)
@@ -725,9 +857,11 @@ def safe_sum(x):
     except (ValueError, SyntaxError):
         return np.nan
 
+
 # Filter NaN values before performing Chi-Square tests or any other operations
 def filter_valid_data(data):
     return data.dropna()  # Remove NaN values
+
 
 # performing Chi-Square tests
 def perform_chi_square_test(pre_data, post_data, label):
@@ -748,8 +882,10 @@ def perform_chi_square_test(pre_data, post_data, label):
     categories = sorted(set(pre_categories).union(set(post_categories)))
 
     # Align counts for each category
-    pre_counts_aligned = np.array([pre_counts[np.where(pre_categories == cat)[0][0]] if cat in pre_categories else 0 for cat in categories])
-    post_counts_aligned = np.array([post_counts[np.where(post_categories == cat)[0][0]] if cat in post_categories else 0 for cat in categories])
+    pre_counts_aligned = np.array(
+        [pre_counts[np.where(pre_categories == cat)[0][0]] if cat in pre_categories else 0 for cat in categories])
+    post_counts_aligned = np.array(
+        [post_counts[np.where(post_categories == cat)[0][0]] if cat in post_categories else 0 for cat in categories])
 
     # Create a contingency table
     contingency_table = np.array([pre_counts_aligned, post_counts_aligned])
@@ -758,6 +894,7 @@ def perform_chi_square_test(pre_data, post_data, label):
     chi2_stat, p_value, dof, expected = chi2_contingency(contingency_table)
 
     return chi2_stat, p_value, dof
+
 
 # Generate pie chart for Chi-Square results
 def generate_chi_square_pie(p_value, label):
@@ -791,6 +928,7 @@ def generate_chi_square_pie(p_value, label):
 
     return fig
 
+
 # Main function to analyze and perform Chi-Square test
 def analyze_with_chi_square(df):
     # Split data into pre- and post-ChatGPT
@@ -807,9 +945,12 @@ def analyze_with_chi_square(df):
     post_word_counts = post_chatgpt['Sentence_Lengths'].apply(lambda x: safe_sum(x) if pd.notnull(x) else np.nan)
 
     # Perform the Chi-Square tests
-    chi2_sentence_count, p_sentence_count, _ = perform_chi_square_test(pre_sentence_count, post_sentence_count, "Sentence Count")
-    chi2_word_lengths, p_word_lengths, _ = perform_chi_square_test(pre_word_lengths, post_word_lengths, "Words per Sentence")
-    chi2_word_counts, p_word_counts, _ = perform_chi_square_test(pre_word_counts, post_word_counts, "Words per Abstract")
+    chi2_sentence_count, p_sentence_count, _ = perform_chi_square_test(pre_sentence_count, post_sentence_count,
+                                                                       "Sentence Count")
+    chi2_word_lengths, p_word_lengths, _ = perform_chi_square_test(pre_word_lengths, post_word_lengths,
+                                                                   "Words per Sentence")
+    chi2_word_counts, p_word_counts, _ = perform_chi_square_test(pre_word_counts, post_word_counts,
+                                                                 "Words per Abstract")
 
     # Generate pie charts
     fig_sentence_count = generate_chi_square_pie(p_sentence_count, "Sentence Count")
@@ -818,10 +959,12 @@ def analyze_with_chi_square(df):
 
     return fig_sentence_count, fig_word_lengths, fig_word_counts
 
+
 # Perform Chi-Square analysis for each region
 fig_eu_sentence_count, fig_eu_word_lengths, fig_eu_word_counts = analyze_with_chi_square(df_eu_sentence)
 fig_asia_sentence_count, fig_asia_word_lengths, fig_asia_word_counts = analyze_with_chi_square(df_asia_sentence)
-fig_fachhochschule_sentence_count, fig_fachhochschule_word_lengths, fig_fachhochschule_word_counts = analyze_with_chi_square(df_fachhochschule_sentence)
+fig_fachhochschule_sentence_count, fig_fachhochschule_word_lengths, fig_fachhochschule_word_counts = analyze_with_chi_square(
+    df_fachhochschule_sentence)
 fig_world_sentence_count, fig_world_word_lengths, fig_world_word_counts = analyze_with_chi_square(df_world_sentence)
 ############################################ End research question 3 ##################################################
 
@@ -971,7 +1114,6 @@ projects_section = html.Div(id="projects", children=[
             f"{'Significant difference' if p_value_fachhochschulen < 0.05 else 'No significant difference'}."
         ))], className="mb-5"),
 
-
         # Research Question 2: Changes in the Use of Question Words
         dbc.Row([
             dbc.Col(html.H4("Research Question 2: Changes in the Use of Question Words"), width=6),
@@ -1049,13 +1191,14 @@ projects_section = html.Div(id="projects", children=[
         ]),
         dbc.Row([
             dbc.Col(dcc.Graph(id="RQ4_comparison", figure=(
-            go.Figure(data=[
-                            go.Bar(name='Abstract Keywords', x=df_RQ4_comparison['index'], y=df_RQ4_comparison['rel_Abstracts']),
-                            go.Bar(name='PDF Keywords', x=df_RQ4_comparison['index'], y=df_RQ4_comparison['rel_PDF'])
-                            ])
-                            .update_layout(barmode='group')
-                )
-            )),
+                go.Figure(data=[
+                    go.Bar(name='Abstract Keywords', x=df_RQ4_comparison['index'],
+                           y=df_RQ4_comparison['rel_Abstracts']),
+                    go.Bar(name='PDF Keywords', x=df_RQ4_comparison['index'], y=df_RQ4_comparison['rel_PDF'])
+                ])
+                .update_layout(barmode='group')
+            )
+                              )),
         ], className="mb-5"),
 
         # Research Question 5: Comparison Between CAU and Other Universities
@@ -1067,7 +1210,7 @@ projects_section = html.Div(id="projects", children=[
         ]),
         # Bar chart for flagged papers percentage (Research Question 5)
         dbc.Row([
-            dbc.Col(    dcc.Graph(
+            dbc.Col(dcc.Graph(
                 id="comparison-graph-5",
                 figure=px.bar(df_grouped_5[df_grouped_5['flag'] == 'Flagged'], x='type', y='percentage', color='type',
                               color_discrete_sequence=colors_blind_friendly,
@@ -1078,7 +1221,9 @@ projects_section = html.Div(id="projects", children=[
 
         # Comparison Before and After 1.1.2023 for Research Question 5
         dbc.Row([
-            dbc.Col(html.H4("Research Question 5: Comparison of Papers Before and After 1.1.2023 (CAU vs Other Universities)"), width=6),
+            dbc.Col(html.H4(
+                "Research Question 5: Comparison of Papers Before and After 1.1.2023 (CAU vs Other Universities)"),
+                    width=6),
             dbc.Col(html.P(
                 "How has the percentage of flagged papers changed before and after 1.1.2023 between CAU and other German universities? "
                 "This graph shows a comparison of flagged papers before and after the introduction of ChatGPT.")),
@@ -1090,7 +1235,8 @@ projects_section = html.Div(id="projects", children=[
                               color_discrete_sequence=colors_blind_friendly,
                               title="Percentage of Flagged Papers Before and After 1.1.2023 (CAU vs Other Universities)",
                               barmode='group',
-                              labels={'type': 'Institution Type', 'percentage': 'Percentage of Papers', 'DateCategory': 'Publication Date Category'})
+                              labels={'type': 'Institution Type', 'percentage': 'Percentage of Papers',
+                                      'DateCategory': 'Publication Date Category'})
             )),
         ], className="mb-5"),
 
@@ -1106,10 +1252,12 @@ projects_section = html.Div(id="projects", children=[
                 figure=px.line(df_year_grouped_5, x='PubDate', y='percentage', color='type',
                                color_discrete_sequence=colors_blind_friendly,
                                title=title_with_p_value,  # Add p-value to the title
-                               labels={'PubDate': 'Publication Year', 'percentage': 'Percentage of Papers', 'type': 'Institution Type'})
-                .add_scatter(x=df_year_grouped_5['PubDate'], y=df_year_grouped_5['trend'], mode='lines', name='Trend Line')
+                               labels={'PubDate': 'Publication Year', 'percentage': 'Percentage of Papers',
+                                       'type': 'Institution Type'})
+                .add_scatter(x=df_year_grouped_5['PubDate'], y=df_year_grouped_5['trend'], mode='lines',
+                             name='Trend Line')
                 .update_layout(xaxis=dict(tickmode='linear', dtick=1))  # Set to display full years on the x-axis
-  # Set to display whole years on the x-axis
+                # Set to display whole years on the x-axis
             )),
         ], className="mb-5"),
         # Research Question 6: Faculty Differences at CAU
@@ -1127,80 +1275,44 @@ projects_section = html.Div(id="projects", children=[
             )),
         ], className="mb-5"),
 
-        # Research Question 7.1: Comparison Between Universities and Fachhochschulen (Percentage of Flagged Papers)
-        dbc.Row([
-            dbc.Col(html.H4("Research Question 7.1: Global Comparison Between Universities and Fachhochschulen"),
-                    width=6),
-            dbc.Col(html.P(
-                "How do the effects of ChatGPT on scientific papers differ between various universities worldwide? "
-                "This includes comparisons between top German universities and Fachhochschulen.")),
-        ]),
-        # Comparison Before and After 1.1.2023 for Research Question 7.1
-        dbc.Row([
-            dbc.Col(html.H4("Research Question 7.1: Comparison of Papers Before and After 1.1.2023"), width=6),
-            dbc.Col(html.P(
-                "How has the percentage of flagged papers changed before and after 1.1.2023? "
-                "This graph shows a comparison of flagged papers before and after the introduction of ChatGPT.")),
-        ]),
-        dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="comparison-graph-7-1",
-                figure=fig_bar_7_1
-            )),
-        ], className="mb-5"),
+        # Interactive description for Research Question 7
+        dbc.Row([dbc.Col(html.H4(
+            "Research Question 7: How do the influences of ChatGPT on scientific papers differ between universities worldwide?"),
+                         width=12)]),
+        dbc.Row([dbc.Col(html.P(
+            "Now you can explore this question interactively! Using the dropdown menu below, you can select combinations "
+            "of different datasets (e.g., German Universities + Fachhochschule, EU + Asia) and compare the flagged papers between "
+            "these institutions. Once you select a combination, two graphs will appear: a bar chart and a line chart displaying trends over time. "
+            "By selecting different combinations, you can see how the influence of ChatGPT varies across regions and institutions. "
+            "Feel free to experiment and discover insights!"
+        ), width=12)]),
+        dbc.Row([dbc.Col(dcc.Dropdown(
+            id='dataset-combination-dropdown',
+            options=[
+                {'label': 'German University + Fachhochschule', 'value': 'df_combined_Uni_FH'},
+                {'label': 'German University + Germany', 'value': 'df_combined_Uni_Germany'},
+                {'label': 'German University + EU', 'value': 'df_combined_Uni_EU'},
+                {'label': 'German University + Asia', 'value': 'df_combined_Uni_Asia'},
+                {'label': 'German University + World', 'value': 'df_combined_Uni_World'},
+                {'label': 'Fachhochschule + Germany', 'value': 'df_combined_FH_Germany'},
+                {'label': 'Fachhochschule + EU', 'value': 'df_combined_FH_EU'},
+                {'label': 'Fachhochschule + Asia', 'value': 'df_combined_FH_Asia'},
+                {'label': 'Fachhochschule + World', 'value': 'df_combined_FH_World'},
+                {'label': 'Germany + EU', 'value': 'df_combined_Germany_EU'},
+                {'label': 'Germany + Asia', 'value': 'df_combined_Germany_Asia'},
+                {'label': 'Germany + World', 'value': 'df_combined_Germany_World'},
+                {'label': 'EU + Asia', 'value': 'df_combined_EU_Asia'},
+                {'label': 'EU + World', 'value': 'df_combined_EU_World'},
+                {'label': 'Asia + World', 'value': 'df_combined_Asia_World'}
+            ],
+            value='df_combined_EU_World',  # Default selection
+            clearable=False
+        ), width=12)]),
 
-        # Line graph for 2020-2024 flagged papers (Research Question 7.1)
-        dbc.Row([
-            dbc.Col(html.H4("Research Question 7.1: Flagged Papers for 2017-2024"), width=6),
-            dbc.Col(html.P(
-                "This graph shows the percentage of flagged papers from 2017 to 2024, separated by institution type.")),
-        ]),
-        dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="year-comparison-graph-7-1-with-trend",
-                figure=fig_line_7_1  # Show full years on the x-axis  # Setzt nur ganze Zahlen als X-Achsen-Werte
-            )),
-        ], className="mb-5"),
-
-        # Research Question 7.2: Comparison Between EU and Asia (Percentage of Flagged Papers)
-        dbc.Row([
-            dbc.Col(html.H4("Research Question 7.2: Global Comparison Between EU and Asia"), width=6),
-            dbc.Col(html.P(
-                "How do the effects of ChatGPT on scientific papers differ between European and Asian institutions? "
-                "This includes comparisons between top EU universities and Asian universities.")),
-        ]),
-        dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="comparison-graph-7-2",
-                figure=fig_bar_7_2
-
-            )),
-        ], className="mb-5"),
-
-        # Comparison Before and After 1.1.2023 for Research Question 7.2
-        dbc.Row([
-            dbc.Col(html.H4("Research Question 7.2: Comparison of Papers Before and After 1.1.2023 (EU and Asia)"),
-                    width=6),
-            dbc.Col(html.P(
-                "How has the percentage of flagged papers changed before and after 1.1.2023 in EU and Asia? "
-                "This graph shows a comparison of flagged papers before and after the introduction of ChatGPT.")),
-        ]),
-
-        # Line graph for 2020-2024 flagged papers (Research Question 7.2)
-        dbc.Row([
-            dbc.Col(html.H4("Research Question 7.2: Flagged Papers for 2017-2024 (EU and Asia)"), width=6),
-            dbc.Col(html.P(
-                "This graph shows the percentage of flagged papers from 2017 to 2024, separated by institution type (EU and Asia).")),
-        ]),
-        dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="year-comparison-graph-7-2-with-trend",
-                figure=fig_line_7_2  # Show full years on the x-axis  # Setzt nur ganze Zahlen als X-Achsen-Werte
-            )),
-        ], className="mb-5"),
+        dbc.Row([dbc.Col(dcc.Graph(id='comparison-bar-chart7'), width=12)]),
+        dbc.Row([dbc.Col(dcc.Graph(id='comparison-line-chart7'), width=12)]),
     ], className="py-5")
 ])
-
 # About Section
 about_section = html.Div(id="about", children=[
     dbc.Container([
