@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import mannwhitneyu
 from ast import literal_eval
 
-# chatgpt:
+#chatgpt:
 # Um  eigene CSV-Datei einzufügen, ersetzen Sie 'your_file.csv' durch den Pfad zu Ihrer CSV-Datei.
 # Stellen Sie sicher, dass Ihre CSV-Datei im selben Verzeichnis wie dieses Skript liegt oder geben Sie den vollständigen Pfad an.
 # df_bsp = pd.read_csv('your_file.csv')
@@ -273,6 +273,10 @@ title_with_p_value = f"Percentage of Flagged Papers for 2017-2024 (CAU vs Other 
 
 # Research question 4
 df_RQ4_comparison = pd.read_csv('Data/RQ4_comparison.csv')
+RQ_4_df = pd.read_csv('Data/RQ4_PDF_Abstract.csv')
+
+##### RQ6 Import
+RQ_6_df = pd.read_csv('Data/RQ6_faculty_keyword.csv')
 
 # Example CSV data
 df_word_usage = pd.DataFrame({
@@ -308,7 +312,6 @@ def extract_words(text):
     pattern = r'(\w+)\s*\((\d+)\)'
     found = re.findall(pattern, text)
     return Counter({word: int(count) for word, count in found})
-
 
 # Function to calculate relative word frequencies
 def calculate_relative_frequencies(df_pre, df_post):
@@ -380,7 +383,6 @@ def generate_relative_frequency_bar(pre_chatgpt_relative, post_chatgpt_relative,
     # Return the figure for use in Dash layout
     return fig
 
-
 # Generate relative frequency bar charts for all regions
 
 # For EU region
@@ -413,8 +415,6 @@ def perform_chi_square_test(pre_chatgpt_relative, post_chatgpt_relative, all_wor
     chi2, p, dof, _ = chi2_contingency(contingency_table)
 
     return chi2, p, dof
-
-
 # Perform the Chi-Square test for EU
 chi2_eu, p_eu, dof_eu = perform_chi_square_test(pre_chatgpt_relative_eu, post_chatgpt_relative_eu, all_words_eu)
 
@@ -1205,15 +1205,33 @@ projects_section = html.Div(id="projects", children=[
                 "Is there a correlation between flagged keywords in abstracts and pdf files?")),
         ]),
         dbc.Row([
-            dbc.Col(dcc.Graph(id="RQ4_comparison", figure=(
-                go.Figure(data=[
-                    go.Bar(name='Abstract Keywords', x=df_RQ4_comparison['index'],
-                           y=df_RQ4_comparison['rel_Abstracts']),
-                    go.Bar(name='PDF Keywords', x=df_RQ4_comparison['index'], y=df_RQ4_comparison['rel_PDF'])
-                ])
-                .update_layout(barmode='group')
-            )
-                              )),
+            html.Div(id='slider-RQ4', children=
+            [dcc.Slider(id='RQ4-year-slider',
+                        min=RQ_4_df['Year'].min(),
+                        max=RQ_4_df['Year'].max(),
+                        value=RQ_4_df['Year'].min(),
+                        marks={str(year): str(year) for year in RQ_4_df['Year'].unique()},
+                        step=None
+                        )], style={'width': '50%', 'display': 'inline-block'}),
+            # inline-block : to show slider and dropdown in the same line
+
+            html.Div(id='RQ4-radio', children=
+            [dcc.RadioItems(id='RQ4-Keyword-radio',
+                            options=[
+                                {'label': 'PDF', 'value': 'Count_PDF'},
+                                {'label': 'Abstract', 'value': 'Count_Abs'}],
+                            value='Count_PDF',
+                            )], style={'width': '50%', 'display': 'inline-block'}),
+
+            html.Div(id='RQ4-radio-log', children=
+            [dcc.RadioItems(id='RQ4-Keyword-radio-log',
+                            options=[
+                                {'label': 'Log scale', 'value': True},
+                                {'label': 'Linear scale', 'value': False}],
+                            value=True,
+                            )], style={'width': '50%', 'display': 'inline-block'}),
+
+            dcc.Graph(id='RQ4-barchart'),
         ], className="mb-5"),
 
         # Research Question 5: Comparison Between CAU and Other Universities
@@ -1285,12 +1303,25 @@ projects_section = html.Div(id="projects", children=[
                 "This project analyzes differences between disciplines, such as natural sciences and humanities.")),
         ]),
         dbc.Row([
-            dbc.Col(dcc.Graph(
-                id="faculty-differences-graph",
-                figure=px.bar(df_word_usage, x="Year", y="Word_Count", color="Word_Type",
-                              title="Comparison of Word Usage by Faculty")
-            )),
-        ], className="mb-5"),
+
+            html.Div(id='slider-RQ6', children=
+            [dcc.Slider(id='RQ6-year-slider',
+                        min=RQ_6_df['Year'].min(),
+                        max=RQ_6_df['Year'].max(),
+                        value=RQ_6_df['Year'].min(),
+                        marks={str(year): str(year) for year in RQ_6_df['Year'].unique()},
+                        step=None
+                        )], style={'width': '50%', 'display': 'inline-block'}),
+            # inline-block : to show slider and dropdown in the same line
+
+            html.Div(id='dropdown-div', children=
+            [dcc.Dropdown(id='RQ6-Keyword-dropdown',
+                          options=[{'label': i, 'value': i} for i in np.append(['All'], RQ_6_df['Keyword'].unique())],
+                          value='All'
+                          )], style={'width': '50%', 'display': 'inline-block'}),
+
+            dcc.Graph(id='RQ6-scatter')
+        ]),
 
         # Interactive description for Research Question 7
         dbc.Row([dbc.Col(html.H4(
@@ -1330,6 +1361,7 @@ projects_section = html.Div(id="projects", children=[
         dbc.Row([dbc.Col(dcc.Graph(id='comparison-line-chart7'), width=12)]),
     ], className="py-5")
 ])
+
 # About Section
 about_section = html.Div(id="about", children=[
     dbc.Container([
