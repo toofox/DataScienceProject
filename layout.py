@@ -444,25 +444,14 @@ def perform_chi_square_test(pre_chatgpt_relative, post_chatgpt_relative, all_wor
 
     return chi2, p, dof, residuals
 
-# Perform the Chi-Square test for Universities
-chi2_universities, p_universities, dof_universities = perform_chi_square_test(pre_chatgpt_relative_universities,
-                                                                              post_chatgpt_relative_universities,
-                                                                              all_words_universities)
 
-# Perform the Chi-Square test for Fachhochschulen
-chi2_fachhochschulen, p_fachhochschulen, dof_fachhochschulen = perform_chi_square_test(
-    pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, all_words_fachhochschulen)
+chi2_universities, p_universities, dof_universities, residuals_universities = perform_chi_square_test(pre_chatgpt_relative_universities,
+                                                                                                       post_chatgpt_relative_universities,
+                                                                                                       all_words_universities)
 
-
-# Function to generate the Chi-Square pie chart, always showing a visual regardless of p-value
-def generate_chi_square_pie(p_value, region_name):
-    # If p-value is 1.0, it means "No significant difference"
-    if p_value >= 0.05:
-        significant_label = "No significant difference"
-        significant_value = 1
-    else:
-        significant_label = "Significant difference"
-        significant_value = 1
+chi2_fachhochschulen, p_fachhochschulen, dof_fachhochschulen, residuals_fachhochschulen = perform_chi_square_test(pre_chatgpt_relative_fachhochschulen,
+                                                                                                                 post_chatgpt_relative_fachhochschulen,
+                                                                                                                 all_words_fachhochschulen)
 def generate_chi_square_heatmap(residuals, words, region_name):
     # Ensure that words are passed as a list, not a set
     words = list(words)  # Convert set to list if necessary
