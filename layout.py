@@ -33,16 +33,20 @@ from scipy import stats
 
 
 # Assuming you have loaded the dataframes df_universities, df_fachhochschulen and merged them as df_combined
-df_universities = pd.read_csv('Data/Merged_Germany_datasets.csv')
-df_fachhochschulen = pd.read_csv('Data/Merged_FH_datasets.csv')
+df_universities = pd.read_csv('Data/Frage7/German_Uni_arxiv_flag_cleaned_no_NaN.csv')
+df_fachhochschulen = pd.read_csv('Data/Frage7/Merged_FH_datasets_cleaned_no_NaN.csv')
 df_universities['type'] = 'Universität'
 df_fachhochschulen['type'] = 'Fachhochschule'
 df_combined_Uni_FH = pd.concat([df_universities, df_fachhochschulen])
-df_eu = pd.read_csv('Data/Merged_EU_datasets_cleaned.csv')
-df_asia = pd.read_csv('Data/Merged_Asia_datasets_cleaned.csv')
+df_eu = pd.read_csv('Data/Frage7/Merged_EU_datasets_cleaned_cleaned_no_NaN.csv')
+df_asia = pd.read_csv('Data/Frage7/Merged_Asia_datasets_cleaned_cleaned_no_NaN.csv')
 df_eu['type'] = 'EU'
 df_asia['type'] = 'Asien'
 df_combined_eu_asia = pd.concat([df_eu, df_asia])
+df_germany = pd.read_csv('Data/Frage7/Merged_Germany_datasets_cleaned_no_NaN.csv')
+df_germany['type'] = 'Germany'
+df_combined_germany_asia = pd.concat([df_germany, df_eu, df_asia])
+df_combined_germany_eu = pd.concat([df_germany, df_eu])
 
 
 
