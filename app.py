@@ -2,7 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html, Input, Output
 import pandas as pd
-from layout import homepage, projects_section, about_section
+from layout import homepage, projects_section, about_section, task_workflow
 import plotly.express as px
 
 # Initialize Dash app with external Bootstrap stylesheet
@@ -177,6 +177,6 @@ def graph_update(slider_value, keyword_value):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
-    #app.run_server(debug=True)
+    #app.run(debug=True)
+    app.run_server(debug=True)
     #app.run(debug=True)
