@@ -39,7 +39,6 @@ df_germany = pd.read_csv('Data/Frage_7/Germany.csv')
 df_eu = pd.read_csv('Data/Frage_7/EU.csv')
 df_asia = pd.read_csv('Data/Frage_7/Asia.csv')
 df_world = pd.read_csv('Data/Frage_7/World.csv')
-
 # Adding 'type' column to differentiate the sources of data
 df_german_uni['type'] = 'Universität DE'
 df_german_fh['type'] = 'Fachhochschule DE'
@@ -88,7 +87,6 @@ df_combined_Germany_World = pd.concat([df_germany, df_world])
 
 # 13. Combine EU and Asia
 df_combined_EU_Asia = pd.concat([df_eu, df_asia])
-
 # 14. Combine EU and World
 df_combined_EU_World = pd.concat([df_eu, df_world])
 
@@ -125,8 +123,8 @@ df_fachhochschulen = pd.read_csv('Data/Frage_7/German_FH.csv')
 df_universities['type'] = 'Universität'
 df_fachhochschulen['type'] = 'Fachhochschule'
 
-df_eu['type'] = 'EU'
-df_asia['type'] = 'Asien'
+#df_eu['type'] = 'EU'
+#df_asia['type'] = 'Asien'
 
 
 def prepare_data(df, date_cutoff=2023):
@@ -155,27 +153,38 @@ def compute_grouped_data(df):
 
 # Schritt 3: Jährliche Trends (Flagged Papiere über bestimmte Jahre hinweg)
 def compute_yearly_trend(df, years_range):
-    # Filtere Daten für die angegebenen Jahre
-    df_filtered_years = df[df['PubDate'].isin(years_range)]
+    # Filter the data for the specified years and remove rows where PubDate is invalid (PubDate == 0)
+    df_filtered_years = df[(df['PubDate'].isin(years_range)) & (df['PubDate'] != 0)]
 
-    # Gruppiere nach Jahr und Typ für markierte Papiere (Flagged)
+    # Group by year and type for flagged papers
     df_year_grouped = df_filtered_years[df_filtered_years['flag'] == 'Flagged'].groupby(
         ['type', 'PubDate']).size().reset_index(name='count')
     df_total_years = df_filtered_years.groupby(['type', 'PubDate']).size().reset_index(name='total_count')
 
-    # Prozentsätze berechnen
+    # Merge the two dataframes
     df_year_grouped = pd.merge(df_year_grouped, df_total_years, on=['type', 'PubDate'])
+
+    # Calculate percentages
     df_year_grouped['percentage'] = (df_year_grouped['count'] / df_year_grouped['total_count']) * 100
 
-    # Lineare Regression zur Berechnung der Trendlinie
+    # Check if there's enough data to perform regression
+    if df_year_grouped.shape[0] < 2:
+        return df_year_grouped, None  # Not enough data for regression
+
+    # Perform linear regression
     years = df_year_grouped['PubDate'].values
     percentages = df_year_grouped['percentage'].values
+
+    if len(years) == 0 or len(percentages) == 0:
+        return df_year_grouped, None  # Avoid running regression on empty arrays
+
     slope, intercept, r_value, p_value, std_err = stats.linregress(years, percentages)
 
-    # Trendlinie hinzufügen
+    # Add trend line
     df_year_grouped['trend'] = intercept + slope * df_year_grouped['PubDate']
 
     return df_year_grouped, p_value
+
 
 
 # Schritt 4: Visualisierungen
@@ -186,8 +195,13 @@ def visualize_task(df_grouped, df_year_grouped, p_value, task_title):
                      labels={'type': 'Institution Type', 'percentage': 'Percentage of Papers'})
 
     # Liniendiagramm für markierte Papiere über die Jahre mit Trendlinie
+    if p_value is not None:
+        title_with_p_value = f"Percentage of Flagged Papers ({task_title}) from {df_year_grouped['PubDate'].min()} to {df_year_grouped['PubDate'].max()} (Trend Line, p-value: {p_value:.4f})"
+    else:
+        title_with_p_value = f"Percentage of Flagged Papers ({task_title}) from {df_year_grouped['PubDate'].min()} to {df_year_grouped['PubDate'].max()} (No valid p-value)"
+
     fig_line = px.line(df_year_grouped, x='PubDate', y='percentage', color='type',
-                       title=f"Percentage of Flagged Papers ({task_title}) from {df_year_grouped['PubDate'].min()} to {df_year_grouped['PubDate'].max()} (Trend Line, p-value: {p_value:.4f})",
+                       title=title_with_p_value,
                        labels={'PubDate': 'Publication Year', 'percentage': 'Percentage of Papers',
                                'type': 'Institution Type'})
 
@@ -195,6 +209,7 @@ def visualize_task(df_grouped, df_year_grouped, p_value, task_title):
     fig_line.add_scatter(x=df_year_grouped['PubDate'], y=df_year_grouped['trend'], mode='lines', name='Trend Line')
 
     return fig_bar, fig_line
+
 
 
 # Schritt 5: Universeller Workflow für jede Aufgabe (z.B. 7.1, 7.2)
@@ -208,10 +223,10 @@ def task_workflow(df, years_range, task_title):
 
 
 # Assuming df_combined is the merged dataframe of universities and Fachhochschulen
-fig_bar_7_1, fig_line_7_1 = task_workflow(df_combined_Uni_FH, [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
-                                          "Universities vs Fachhochschulen")
-fig_bar_7_2, fig_line_7_2 = task_workflow(df_combined_Asia_World, [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
-                                          "EU vs Asia")
+#fig_bar_7_1, fig_line_7_1 = task_workflow(df_combined_Uni_FH, [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
+#                                          "Universities vs Fachhochschulen")
+#fig_bar_7_2, fig_line_7_2 = task_workflow(df_combined_Asia_World, [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
+#                                          "EU vs Asia")
 
 # Frage 5
 df_kiel_uni_5 = pd.read_csv('Data/Kiel_Uni_arxiv_flag_updated.csv')
@@ -1212,10 +1227,12 @@ projects_section = html.Div(id="projects", children=[
         dbc.Row([
             dbc.Col(dcc.Graph(
                 id="comparison-graph-5",
-                figure=px.bar(df_grouped_5[df_grouped_5['flag'] == 'Flagged'], x='type', y='percentage', color='type',
-                              color_discrete_sequence=colors_blind_friendly,
-                              title="Percentage of Flagged Papers: CAU vs Other Universities",
-                              labels={'type': 'Institution Type', 'percentage': 'Percentage of Papers'})
+                figure=px.bar(df_grouped_5, x='type', y='percentage', color='flag',
+                           title="Flagged vs Non-Flagged Papers (CAU vs Other Universities)",
+                           labels={'type': 'Institution Type', 'percentage': 'Percentage of Papers',
+                                   'flag': 'Flagged Status'},
+                           barmode='stack')
+
             )),
         ], className="mb-5"),
 
