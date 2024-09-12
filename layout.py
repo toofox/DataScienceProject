@@ -252,7 +252,7 @@ df_date_grouped_5 = pd.merge(df_date_grouped_5, df_total_date_5, on=['type', 'Da
 df_date_grouped_5['percentage'] = (df_date_grouped_5['count'] / df_date_grouped_5['total_count']) * 100
 
 # 3. Line chart for flagged papers for 2020-2024
-df_filtered_years_5 = df_combined_5[df_combined_5['PubDate'].isin([2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024])]
+df_filtered_years_5 = df_combined_5[df_combined_5['PubDate'].isin([2012,2013,2014,2015,2016,2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024])]
 df_year_grouped_5 = df_filtered_years_5[df_filtered_years_5['flag'] == 'Flagged'].groupby(
     ['type', 'PubDate']).size().reset_index(name='count')
 df_total_years_5 = df_filtered_years_5.groupby(['type', 'PubDate']).size().reset_index(name='total_count')
@@ -1246,6 +1246,18 @@ projects_section = html.Div(id="projects", children=[
 
             )),
         ], className="mb-5"),
+        dbc.Row([
+            dbc.Col(dbc.Card([
+                dbc.CardHeader("Explanation"),
+                dbc.CardBody(html.P(
+                    "This bar chart compares the percentage of flagged papers from Christian-Albrechts-Universität zu Kiel (CAU) "
+                    "with other universities. Flagged papers are those that contain certain keywords associated with being influenced "
+                    "by ChatGPT. Non-flagged papers are those without these keywords. "
+                    "The proportions are similar for both CAU and other universities, indicating comparable levels of ChatGPT-influenced content.",
+                    style={"color": "#444", "font-size": "15px"}
+                ))
+            ], color="light", outline=True), width=12),
+        ], className="mb-5"),
 
         # Comparison Before and After 1.1.2023 for Research Question 5
         dbc.Row([
@@ -1267,12 +1279,23 @@ projects_section = html.Div(id="projects", children=[
                                       'DateCategory': 'Publication Date Category'})
             )),
         ], className="mb-5"),
+        dbc.Row([
+            dbc.Col(dbc.Card([
+                dbc.CardHeader("Explanation"),
+                dbc.CardBody(html.P(
+                    "This chart compares the percentage of flagged papers before and after January 1, 2023, when ChatGPT became widely available. "
+                    "The graph shows an increase in flagged papers after 1.1.2023, especially for other universities, suggesting the rising influence of ChatGPT.",
+                    "The proportions are similar for both CAU and other universities, indicating comparable levels of ChatGPT-influenced content.",
+                    style={"color": "#444", "font-size": "15px"}
+                ))
+            ], color="light", outline=True), width=12),
+        ], className="mb-5"),
 
         # Line graph for 2020-2024 flagged papers (Research Question 5)
         dbc.Row([
-            dbc.Col(html.H4("Research Question 5: Flagged Papers for 2020-2024 (CAU vs Other Universities)"), width=6),
+            dbc.Col(html.H4("Research Question 5: Comparing CAU with other German Universities"), width=6),
             dbc.Col(html.P(
-                "This graph shows the percentage of flagged papers from 2020 to 2024, separated by institution type (CAU and other universities).")),
+                "This graph shows the percentage of flagged papers from 2012 to 2024, separated by institution type (CAU and other universities).")),
         ]),
         dbc.Row([
             dbc.Col(dcc.Graph(
@@ -1287,6 +1310,17 @@ projects_section = html.Div(id="projects", children=[
                 .update_layout(xaxis=dict(tickmode='linear', dtick=1))  # Set to display full years on the x-axis
                 # Set to display whole years on the x-axis
             )),
+        ], className="mb-5"),
+        dbc.Row([
+            dbc.Col(dbc.Card([
+                dbc.CardHeader("Explanation"),
+                dbc.CardBody(html.P(
+                    "This line chart tracks the percentage of flagged papers from 2012 to 2024, comparing CAU with other universities. "
+                    "The trend line indicates a general upward trajectory, suggesting a growing influence of ChatGPT on scientific papers over these years.",
+                    "We see no significant difference between CAU and other universities, as indicated by the p-value.",
+                    style={"color": "#444", "font-size": "15px"}
+                ))
+            ], color="light", outline=True), width=12),
         ], className="mb-5"),
         # Research Question 6: Faculty Differences at CAU
         dbc.Row([
@@ -1331,14 +1365,6 @@ projects_section = html.Div(id="projects", children=[
             id='dataset-combination-dropdown',
             options=[
                 {'label': 'German University + Fachhochschule', 'value': 'df_combined_Uni_FH'},
-                {'label': 'German University + Germany', 'value': 'df_combined_Uni_Germany'},
-                {'label': 'German University + EU', 'value': 'df_combined_Uni_EU'},
-                {'label': 'German University + Asia', 'value': 'df_combined_Uni_Asia'},
-                {'label': 'German University + World', 'value': 'df_combined_Uni_World'},
-                {'label': 'Fachhochschule + Germany', 'value': 'df_combined_FH_Germany'},
-                {'label': 'Fachhochschule + EU', 'value': 'df_combined_FH_EU'},
-                {'label': 'Fachhochschule + Asia', 'value': 'df_combined_FH_Asia'},
-                {'label': 'Fachhochschule + World', 'value': 'df_combined_FH_World'},
                 {'label': 'Germany + EU', 'value': 'df_combined_Germany_EU'},
                 {'label': 'Germany + Asia', 'value': 'df_combined_Germany_Asia'},
                 {'label': 'Germany + World', 'value': 'df_combined_Germany_World'},
