@@ -265,11 +265,11 @@ df_year_grouped_5['trend'] = intercept + slope * df_year_grouped_5['PubDate']
 title_with_p_value = f"Percentage of Flagged Papers for 2017-2024 (CAU vs Other Universities)\nTrend Line (p-value: {p_value:.4f})"
 
 # Research question 4
-df_RQ4_comparison = pd.read_csv('Data/RQ4_comparison.csv')
-RQ_4_df = pd.read_csv('Data/RQ4_PDF_Abstract.csv')
+df_RQ4_comparison = pd.read_csv('Data/RQ4+6/RQ4_comparison.csv')
+RQ_4_df = pd.read_csv('Data/RQ4+6/RQ4_PDF_Abstract.csv')
 
 ##### RQ6 Import
-RQ_6_df = pd.read_csv('Data/RQ6_faculty_keyword.csv')
+RQ_6_df = pd.read_csv('Data/RQ4+6/RQ6_faculty_keyword.csv')
 
 # Example CSV data
 df_word_usage = pd.DataFrame({

@@ -24,8 +24,8 @@ df_world['type'] = 'World'
 
 ###### IMPORT SECTION ######
 
-RQ_4_df = pd.read_csv('Data/RQ4_PDF_Abstract.csv')
-RQ_6_df = pd.read_csv('Data/RQ6_faculty_keyword.csv')
+RQ_4_df = pd.read_csv('Data/RQ4+6/RQ4_PDF_Abstract.csv')
+RQ_6_df = pd.read_csv('Data/RQ4+6/RQ6_faculty_keyword.csv')
 
 ############################
 
