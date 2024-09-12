@@ -1,23 +1,13 @@
-import dash_bootstrap_components as dbc
-from dash import html, dcc
-import plotly.express as px
-import pandas as pd
-from scipy import stats
-import numpy as np
-from collections import Counter
 import re
-import dash
-from scipy.stats import chi2_contingency, shapiro, norm
-import plotly.graph_objects as go
-import matplotlib.pyplot as plt
-from scipy.stats import mannwhitneyu
 from ast import literal_eval
+from collections import Counter
 
-#chatgpt:
-# Um  eigene CSV-Datei einzufügen, ersetzen Sie 'your_file.csv' durch den Pfad zu Ihrer CSV-Datei.
-# Stellen Sie sicher, dass Ihre CSV-Datei im selben Verzeichnis wie dieses Skript liegt oder geben Sie den vollständigen Pfad an.
-# df_bsp = pd.read_csv('your_file.csv')
-# df_bsp.head({Anzahl der Zeilen, die angezeigt werden sollen})
+import dash_bootstrap_components as dbc
+import numpy as np
+import plotly.graph_objects as go
+from dash import html, dcc
+from scipy.stats import chi2_contingency, shapiro
+from scipy.stats import mannwhitneyu
 
 
 colors_blind_friendly = ['#D55E00', '#0072B2', '#F0E442', '#009E73', '#E69F00', '#56B4E9', '#CC79A7', '#8E44AD',
@@ -25,11 +15,9 @@ colors_blind_friendly = ['#D55E00', '#0072B2', '#F0E442', '#009E73', '#E69F00', 
 
 # DATEN AUS CSV
 # test
-import pandas as pd
 import plotly.express as px
 from scipy import stats
 
-# Assuming you have loaded the dataframes df_universities, df_fachhochschulen and merged them as df_combined
 import pandas as pd
 
 # Load all datasets
@@ -101,30 +89,35 @@ datasets = {
     'Asia': df_asia,
     'World': df_world
 }
-# Now you have all two-way combinations of datasets in the following variables:
-# - df_combined_Uni_FH
-# - df_combined_Uni_Germany
-# - df_combined_Uni_EU
-# - df_combined_Uni_Asia
-# - df_combined_Uni_World
-# - df_combined_FH_Germany
-# - df_combined_FH_EU
-# - df_combined_FH_Asia
-# - df_combined_FH_World
-# - df_combined_Germany_EU
-# - df_combined_Germany_Asia
-# - df_combined_Germany_World
-# - df_combined_EU_Asia
-# - df_combined_EU_World
-# - df_combined_Asia_World
+
+
+
+
+
+
+
+
 
 df_universities = pd.read_csv('Data/Frage_7/German_Uni.csv')
 df_fachhochschulen = pd.read_csv('Data/Frage_7/German_FH.csv')
 df_universities['type'] = 'Universität'
 df_fachhochschulen['type'] = 'Fachhochschule'
 
-#df_eu['type'] = 'EU'
-#df_asia['type'] = 'Asien'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def prepare_data(df, date_cutoff=2023):
