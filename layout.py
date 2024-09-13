@@ -1550,39 +1550,55 @@ projects_section = html.Div(id="projects", children=[
 
         # Research Question 4: Comparison of Flagged Keywords in PDFs and Abstracts
         dbc.Row([
-            dbc.Col(html.H4("Research Question 4: Comparison of PDF and abstract flagging"), width=6),
+            dbc.Col(html.H4("Research Question 4: Comparing PDFs against Abstracts regarding the flagged keywords"), width=6),
             dbc.Col(html.P(
                 "How often do certain keywords get flagged in papers?"
-                "Is there a correlation between flagged keywords in abstracts and pdf files?")),
+                "Is there a correlation between flagged keywords in abstracts and pdf files?"
+                "Is it possible to make assumptions regarding the influence of ChatGPT on the publication,"
+                "if we only filter the abstract?"
+            )),
         ]),
         dbc.Row([
             html.Div(id='slider-RQ4', children=
-            [dcc.Slider(id='RQ4-year-slider',
+                    [dcc.Slider(id='RQ4-year-slider',
                         min=RQ_4_df['Year'].min(),
                         max=RQ_4_df['Year'].max(),
                         value=RQ_4_df['Year'].min(),
                         marks={str(year): str(year) for year in RQ_4_df['Year'].unique()},
                         step=None
-                        )], style={'width': '50%', 'display': 'inline-block'}),
+            )], style={'width': '50%', 'display': 'inline-block'}),
+            dbc.Col([
             # inline-block : to show slider and dropdown in the same line
+            dbc.Row([
+                html.Div(id='RQ4-radio', children=
+                    [dcc.RadioItems(id='RQ4-Keyword-radio',
+                        options=[   {'label': 'PDF', 'value': 'Count_PDF'},
+                                    {'label': 'Abstract', 'value': 'Count_Abs'}],
+                        value='Count_PDF',
+                    )], style={'width': '50%', 'display': 'inline-block'}),
 
-            html.Div(id='RQ4-radio', children=
-            [dcc.RadioItems(id='RQ4-Keyword-radio',
-                            options=[
-                                {'label': 'PDF', 'value': 'Count_PDF'},
-                                {'label': 'Abstract', 'value': 'Count_Abs'}],
-                            value='Count_PDF',
-                            )], style={'width': '50%', 'display': 'inline-block'}),
-
-            html.Div(id='RQ4-radio-log', children=
-            [dcc.RadioItems(id='RQ4-Keyword-radio-log',
-                            options=[
+                html.Div(id='RQ4-radio-log', children=
+                    [dcc.RadioItems(id='RQ4-Keyword-radio-log',
+                        options=[
                                 {'label': 'Log scale', 'value': True},
                                 {'label': 'Linear scale', 'value': False}],
-                            value=True,
-                            )], style={'width': '50%', 'display': 'inline-block'}),
-
-            dcc.Graph(id='RQ4-barchart'),
+                        value=True,
+                    )], style={'width': '50%', 'display': 'inline-block'}),
+            ]), dcc.Graph(id='RQ4-barchart'),
+            ]),
+            dbc.Col([
+                html.P(
+                "Comparing abstracts to full length texts had the intention of revealing"
+                "possible ways of identifying ChatGPT influences in scientific publications. Because Publications always"
+                "come with an abstract we decided to filter them for keywords that might suggest an influence by ChatGPT."
+                "To research the similarities in PDF and abstract flagged keywords we took the sample from arXiv and"
+                "made a separate PDF request and compared the flagged keywords against abstracts."
+                "While some keywords didnt get flagged in the abstracts we could show, that if a paper was flagged"
+                "by the abstract reader, the PDF would show a similar relative number of occurrences."
+                "The most notable keywords were: scholarly, versatile, noteworthy and notable. :)"
+                ),
+                html.Img(src="/assets/RQ4_Wordcloud_PDF_rel.png", style={"width": "100%", "height": "auto", "max-width": "600px"})
+            ])
         ], className="mb-5"),
 
         # Research Question 5: Comparison Between CAU and Other Universities
@@ -1685,10 +1701,10 @@ projects_section = html.Div(id="projects", children=[
             dbc.Col(html.H4("Research Question 6: Faculty Differences at CAU"), width=6),
             dbc.Col(html.P(
                 "How has word usage changed across different faculties at CAU since the introduction of ChatGPT? "
-                "This project analyzes differences between disciplines, such as natural sciences and humanities.")),
+                "This scatter plot shows the flagged keywords over the faculties and how many papers were flagged "
+                "in each year.")),
         ]),
         dbc.Row([
-
             html.Div(id='slider-RQ6', children=
             [dcc.Slider(id='RQ6-year-slider',
                         min=RQ_6_df['Year'].min(),
@@ -1707,6 +1723,18 @@ projects_section = html.Div(id="projects", children=[
 
             dcc.Graph(id='RQ6-scatter')
         ]),
+        dbc.Row(
+            html.P(
+                "Using the arXiv API we extracted a bunch of papers across six faculties from the Kiel University."
+                "The majority of those papers were from the Faculty of Engineering followed closely by the Faculty of "
+                "Mathematics and Natural Sciences. The other faculties were in descending order of number papers released;\n"
+                "Economics and Social Sciences, Philosophical, Agricultural and Nutritional Sciences and the Faculty of Law"
+                "While some faculties published only a few papers in the relevant timeframe and therefore made a "
+                "meaningful interpretation hard, we found a significant increase in flagged papers around the "
+                "introduction of ChatGPT, leading us to assume at least an influence by ChatGPT."
+                # Tech: 326, Math: 217, Econ: 46, Phil: 24, Diet: 14, Law:  7
+            )
+        ),
 
         # Interactive description for Research Question 7
         dbc.Row([dbc.Col(html.H4(

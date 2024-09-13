@@ -10,7 +10,7 @@ from dash import Input, Output
 from layout import *  # Importiert alle Variablen, Funktionen und Klassen aus layout.py
 
 # Initialize Dash app with external Bootstrap stylesheet
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX], assets_folder='assets')
 server = app.server
 df_german_uni = pd.read_csv('Data/Frage_7/German_Uni.csv')
 df_german_fh = pd.read_csv('Data/Frage_7/German_FH.csv')
@@ -124,7 +124,7 @@ def graph_rq4_update(slider_value, radio_value, xaxis_type):
 
     fig.update_layout(
         height=800,
-        width=800,
+        width=700,
         xaxis_title=radio_value,
         yaxis=dict(showgrid=True, showline=True, ticks='outside', tickson='boundaries', automargin=True),
         xaxis=dict(showgrid=True, showline=True, ticks='outside', tickson='boundaries', automargin=True)
@@ -671,6 +671,6 @@ def update_charts_RQ3(region):
     return html.P("No region selected for the third Research Question")
 
 if __name__ == '__main__':
-    #app.run(debug=True)
-    app.run_server(debug=True)
+    app.run(debug=True)
+    #app.run_server(debug=True)
     #app.run(debug=True)
