@@ -312,7 +312,6 @@ color_green = colors_blind_friendly[3] # green
 
 df_world_q1 = pd.read_csv("Data/Merged_World_datasets.csv")
 
-# Relative Frequency Calculation for multiple regions
 # Function to extract words and their frequencies from the "found_words" column
 def extract_words(text):
     pattern = r'(\w+)\s*\((\d+)\)'
@@ -377,7 +376,7 @@ pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, all
 
 # Function to generate bar chart for relative word usage
 def generate_relative_frequency_bar(pre_chatgpt_relative, post_chatgpt_relative, region_name):
-    # Convert the relative frequency data into a DataFrame
+
     df = pd.DataFrame({
         'Word': list(pre_chatgpt_relative.keys()),
         'Pre_ChatGPT': list(pre_chatgpt_relative.values()),
@@ -401,7 +400,6 @@ def generate_relative_frequency_bar(pre_chatgpt_relative, post_chatgpt_relative,
     return fig
 
 # Generate relative frequency bar charts for all regions
-
 # For EU region
 fig_bar_eu = generate_relative_frequency_bar(pre_chatgpt_relative_eu, post_chatgpt_relative_eu, "EU universities")
 
@@ -419,8 +417,6 @@ fig_bar_fachhochschulen = generate_relative_frequency_bar(pre_chatgpt_relative_f
 
 
 # Chi-Square Test function
-# Function to perform Chi-Square test for word groups
-
 
 def perform_chi_square_test(pre_chatgpt_relative, post_chatgpt_relative, all_words):
     # Prepare lists to store observed (post) and expected (pre) relative frequencies
@@ -433,7 +429,7 @@ def perform_chi_square_test(pre_chatgpt_relative, post_chatgpt_relative, all_wor
         'Observed (Post_ChatGPT)': observed_values
     })
 
-    # Ensure no zero counts by adding a small value (optional)
+    # Ensure no zero counts by adding a small value
     contingency_table += 1e-10
 
     # Perform the Chi-Square test (returning chi2 and p-value)
@@ -506,11 +502,11 @@ chi2_asia, p_asia, dof_asia, residuals_asia = perform_chi_square_test(pre_chatgp
 fig_heatmap_asia = generate_chi_square_heatmap(residuals_asia, all_words_asia, "Asia universities")
 
 
-# Now also World Q1
+# World
 chi2_world_q1, p_world_q1, dof_world_q1, residuals_world_q1 = perform_chi_square_test(pre_chatgpt_relative_world_q1, post_chatgpt_relative_world_q1, all_words_world_q1)
 fig_heatmap_world_q1 = generate_chi_square_heatmap(residuals_world_q1, all_words_world_q1, "World universities")
 
-# Fachhochschulen
+# universities of applied science
 chi2_fachhochschulen, p_fachhochschulen, dof_fachhochschulen, residuals_fachhochschulen = perform_chi_square_test(pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen, all_words_fachhochschulen)
 fig_heatmap_fachhochschulen = generate_chi_square_heatmap(residuals_fachhochschulen, all_words_fachhochschulen, "German universities of applied sciences")
 
@@ -539,12 +535,10 @@ shapiro_pre_eu, shapiro_post_eu = perform_shapiro_test(pre_chatgpt_relative_eu, 
 shapiro_pre_asia, shapiro_post_asia = perform_shapiro_test(pre_chatgpt_relative_asia, post_chatgpt_relative_asia)
 shapiro_pre_universities, shapiro_post_universities = perform_shapiro_test(pre_chatgpt_relative_universities, post_chatgpt_relative_universities)
 shapiro_pre_fachhochschulen, shapiro_post_fachhochschulen = perform_shapiro_test(pre_chatgpt_relative_fachhochschulen, post_chatgpt_relative_fachhochschulen)
-# Now include World Q1
 shapiro_pre_world_q1, shapiro_post_world_q1 = perform_shapiro_test(pre_chatgpt_relative_world_q1, post_chatgpt_relative_world_q1)
 
 
 # Function to plot Shapiro-Wilk Test histograms for normality visualization
-# Function to generate histogram for Shapiro-Wilk test with a normal distribution line
 def generate_shapiro_histogram_figure(pre_values, post_values, region_name):
     # Create a figure for Plotly histogram
     fig = go.Figure()
@@ -569,7 +563,7 @@ def generate_shapiro_histogram_figure(pre_values, post_values, region_name):
     y_post = (1 / (std_post * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((x_post - mean_post) / std_post) ** 2)
     fig.add_trace(go.Scatter(x=x_post, y=y_post, mode='lines', name='Theoretical normal Distribution (Post-ChatGPT)', line=dict(color='orange', width=2)))
 
-    # Update layout
+    # layout design
     fig.update_layout(
         title=f'Shapiro-Wilk Test Histogram for {region_name}',
         barmode='overlay',
@@ -581,6 +575,7 @@ def generate_shapiro_histogram_figure(pre_values, post_values, region_name):
     )
 
     return fig
+
 # Generate the Shapiro-Wilk histogram figures for all regions
 
 # EU region
@@ -604,14 +599,14 @@ fig_shapiro_universities = generate_shapiro_histogram_figure(
     "German universities"
 )
 
-# Fachhochschulen region
+# Universities for applied science region
 fig_shapiro_fachhochschulen = generate_shapiro_histogram_figure(
     list(pre_chatgpt_relative_fachhochschulen.values()),
     list(post_chatgpt_relative_fachhochschulen.values()),
     "German universities of applied sciences"
 )
 
-# World Q1 region
+# World region
 fig_shapiro_world_q1 = generate_shapiro_histogram_figure(
     list(pre_chatgpt_relative_world_q1.values()),
     list(post_chatgpt_relative_world_q1.values()),
@@ -644,8 +639,6 @@ def generate_violin_plot(pre_values, post_values, region_name):
     # Create the violin plot with custom colors
     fig = px.violin(data, x='Group', y='Values', box=True, points='all', title=f"Mann-Whitney U Test for {region_name}",
                     color='Group', color_discrete_map={'Pre-ChatGPT': color_blue, 'Post-ChatGPT': color_orange})
-
-    # Customize layout
 
     return fig
 
@@ -716,7 +709,6 @@ def calculate_relative_frequencies(word_counts, num_abstracts):
 # Function to calculate relative frequencies of question marks
 def calculate_relative_marks(df, num_abstracts):
     return df['Question_Mark_Count'].sum() / num_abstracts
-# Process each region separately
 
 # Function to generate bar chart for question words with the specified colors
 def generate_question_word_bar_chart(before_values, after_values, words,region_name_q):
@@ -724,7 +716,7 @@ def generate_question_word_bar_chart(before_values, after_values, words,region_n
     fig.add_trace(go.Bar(x=words, y=before_values, name='Pre-ChatGPT', marker_color=color_blue))
     fig.add_trace(go.Bar(x=words, y=after_values, name='Post-ChatGPT', marker_color=color_orange))
 
-    # Update layout
+    # layout design
     fig.update_layout(
         title=f"Comparison of Relative Frequencies of Question Words (Pre-ChatGPT vs Post-ChatGPT) <br> for {region_name_q}",
         xaxis_title="Question Words",
@@ -771,7 +763,7 @@ def process_region_data(df, region_name):
     words_before_2023 = aggregate_question_words(df_before_2023)
     words_after_2023 = aggregate_question_words(df_after_2023)
 
-    # Filter out excluded words
+    # Filter out excluded words, because they belong to "how2
     excluded_words = {'much', 'many', 'far', 'long'}
     words_before_2023_filtered = {k: v for k, v in words_before_2023.items() if k not in excluded_words}
     words_after_2023_filtered = {k: v for k, v in words_after_2023.items() if k not in excluded_words}
@@ -830,7 +822,6 @@ def perform_chi_square_test_question_words(before_values, after_values, all_word
     # Create heatmap of residuals (observed - expected)
     residuals = np.array(after_values) - np.array(before_values)
 
-    # Generate heatmap using residuals
 
     fig = go.Figure(data=go.Heatmap(
         z=[residuals],  # Heatmap data
@@ -1063,7 +1054,7 @@ def process_region_with_mann_whitney_test(df, region_name):
 
     return u_stat, p_value, fig_violin
 
-# Perform the Mann-Whitney U test for each region (Forschungsfrage 2)
+# Perform the Mann-Whitney U test for each region
 u_stat_q2_eu, p_value_q2_eu, fig_violin_q2_eu = process_region_with_mann_whitney_test(df_eu_question, "EU")
 u_stat_q2_asia, p_value_q2_asia, fig_violin_q2_asia = process_region_with_mann_whitney_test(df_asia_question, "Asia")
 u_stat_q2_fachhochschule, p_value_q2_fachhochschule, fig_violin_q2_fachhochschule = process_region_with_mann_whitney_test(df_fachhochschule_question, "German universites of applied Science")
@@ -1122,7 +1113,7 @@ def calculate_averages(df):
     return avg_sentence_count, avg_words_per_sentence, avg_words_per_abstract
 
 
-# Visualization using Plotly
+# Visualization the averages
 def visualize_averages(pre_averages, post_averages, region_name):
     labels = ['Sentence Count', 'Words per Sentence', 'Words per Abstract']
 
@@ -1203,7 +1194,7 @@ def filter_valid_data(data):
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # Function to perform Kolmogorov-Smirnov test and create histograms with theoretical normal distribution
-# Function to perform Kolmogorov-Smirnov test and create histograms with theoretical normal distribution
+# this is better than the Shapori test when it comes to larger data sets
 def ks_test_and_visualization(pre_data, post_data, label, region_name, title_prefix):
     # Drop NaN values and ensure valid data
     pre_data_clean = pre_data.dropna()
@@ -1240,7 +1231,7 @@ def ks_test_and_visualization(pre_data, post_data, label, region_name, title_pre
     fig.update_layout(barmode='overlay', title=f'{title_prefix} for {region_name}',
                       xaxis_title=label, yaxis_title='Density', showlegend=True)
 
-    # Limit the x-axis to a specific range (for example, between 0 and 2000 for "Words per Abstract")
+    # Limit the x-axis to a specific range
     #fig.update_xaxes(range=[0, 200])  # Adjust this range based on your specific data and expected outliers
 
     # Interpretation of the results including KS value and p-value
@@ -1336,6 +1327,7 @@ df_germany_sentence['Words_per_Sentence'] = df_germany_sentence['Sentence_Length
 df_germany_sentence['Words_per_Abstract'] = df_germany_sentence['Sentence_Lengths'].apply(safe_sum)
 
 # Function to perform Mann-Whitney U-Test and create violin plot with median comparison
+# This is optimal for data that is not normally distributed. But can also be used for normally distributed data
 def mann_whitney_test_and_visualization(pre_data, post_data, label, region_name):
     # Drop NaN values and ensure valid data
     try:
@@ -1461,8 +1453,10 @@ projects_section = html.Div(id="projects", children=[
         dbc.Row([
             dbc.Col(html.H2("Research Questions", style={"color": "#9b0a7d"}), className="mt-5 mb-4 text-center"),
         ]),
-        # Leere Zeile für zusätzlichen Abstand
+
         dbc.Row([dbc.Col(html.Div(), style={"height": "30px"})]),
+
+        #Research Question 2
 
         dbc.Row([
             dbc.Col(html.H2("Research Question 1: Change in the use of certain words"), width=6),
@@ -1487,12 +1481,11 @@ projects_section = html.Div(id="projects", children=[
                 id='RQ1_Dropdown'
             )
         ]),
-        # Container für die Diagramme
+        # Container for the diagrammes
         html.Div(id='charts-container-RQ1'),
 
         dbc.Row([dbc.Col(html.H2(""), className="mb-4 text-center")]),
 
-        # Research Question 1: Changes in Word Usage (using real data)
 
         # Research Question 2
 
@@ -1501,7 +1494,7 @@ projects_section = html.Div(id="projects", children=[
             dbc.Col(html.P(
                 "What changes have there been in the use of question words (e.g. what, why) in scientific papers since the introduction of ChatGPT?.")),
         ]),
-        # Leere Zeile für zusätzlichen Abstand
+
         dbc.Row([dbc.Col(html.Div(), style={"height": "30px"})]),
 
         dbc.Row([
@@ -1528,7 +1521,7 @@ projects_section = html.Div(id="projects", children=[
             dbc.Col(html.P(
                 "How has the length of sentences in scientific papers changed since the introduction of ChatGPT? We aim to investigate whether sentences have become longer or shorter post-ChatGPT.")),
         ]),
-        # Leere Zeile für zusätzlichen Abstand
+
         dbc.Row([dbc.Col(html.Div(), style={"height": "30px"})]),
 
         dbc.Row([

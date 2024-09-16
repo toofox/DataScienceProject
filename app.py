@@ -7,7 +7,7 @@ import plotly.express as px
 from dash import dcc, html
 from layout import homepage, projects_section, about_section
 from dash import Input, Output
-from layout import *  # Importiert alle Variablen, Funktionen und Klassen aus layout.py
+from layout import *
 
 # Initialize Dash app with external Bootstrap stylesheet
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX], assets_folder='assets')
@@ -498,7 +498,7 @@ def update_charts_RQ2(region):
             ))], className="mb-5"),
         ]
 
-    # Fallback für nicht erkannte Regionen
+
     return html.P("No region selected for Question Words (Research Question 2)")
 
 @app.callback(
@@ -640,30 +640,30 @@ def update_charts_RQ3(region):
             dbc.Row([dbc.Col(html.H2("German universities of applied Science Section"), className="mb-4 text-center", style={"margin-top": "20px"})]),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_fachhochschule_avg))], className="mb-5"),
 
-            # Kolmogorov-Smirnov Test for Sentence Count in Fachhochschule
+            # Kolmogorov-Smirnov Test for Sentence Count in universities in applied science
             dbc.Row([dbc.Col(dcc.Graph(figure=result_fachhochschule_ks["figures"]["Sentence Count"]))]),
             dbc.Row([dbc.Col(html.P(f"{result_fachhochschule_ks['interpretation']['Sentence Count'][0]}"))]),
             dbc.Row([dbc.Col(html.P(f"{result_fachhochschule_ks['interpretation']['Sentence Count'][1]}"))]),
 
-            # Kolmogorov-Smirnov Test for Words per Sentence in Fachhochschule
+            # Kolmogorov-Smirnov Test for Words per Sentence in universities in applied science
             dbc.Row([dbc.Col(dcc.Graph(figure=result_fachhochschule_ks["figures"]["Words per Sentence"]))]),
             dbc.Row([dbc.Col(html.P(f"{result_fachhochschule_ks['interpretation']['Words per Sentence'][0]}"))]),
             dbc.Row([dbc.Col(html.P(f"{result_fachhochschule_ks['interpretation']['Words per Sentence'][1]}"))]),
 
-            # Kolmogorov-Smirnov Test for Words per Abstract in Fachhochschule
+            # Kolmogorov-Smirnov Test for Words per Abstract universities in applied science
             dbc.Row([dbc.Col(dcc.Graph(figure=result_fachhochschule_ks["figures"]["Words per Abstract"]))]),
             dbc.Row([dbc.Col(html.P(f"{result_fachhochschule_ks['interpretation']['Words per Abstract'][0]}"))]),
             dbc.Row([dbc.Col(html.P(f"{result_fachhochschule_ks['interpretation']['Words per Abstract'][1]}"))]),
 
-            # Mann-Whitney Test for Sentence Count in Fachhochschule
+            # Mann-Whitney Test for Sentence Count universities in applied science
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_fachhochschule_mw_sentence_count))]),
             dbc.Row([dbc.Col(html.P(f"{result_fachhochschule_mw_sentence_count}"))]),
 
-            # Mann-Whitney Test for Words per Sentence in Fachhochschule
+            # Mann-Whitney Test for Words per Sentence universities in applied science
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_fachhochschule_mw_words_per_sentence))]),
             dbc.Row([dbc.Col(html.P(f"{result_fachhochschule_mw_words_per_sentence}"))]),
 
-            # Mann-Whitney Test for Words per Abstract in Fachhochschule
+            # Mann-Whitney Test for Words per Abstract universities in applied science
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_fachhochschule_mw_words_per_abstract))]),
             dbc.Row([dbc.Col(html.P(f"{result_fachhochschule_mw_words_per_abstract}"))]),
         ]
